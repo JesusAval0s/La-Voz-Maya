@@ -1,0 +1,60 @@
+.splash-content {
+  --background: #ffffff;
+
+  .splash-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    height: 100%;
+    padding: 3rem 1.5rem;
+  }
+
+  .brand-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+
+    .logo-wrapper {
+      width: 280px;
+      height: 280px;
+      max-width: 85vw;
+      margin-bottom: 1rem;
+
+      .main-logo {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+    }
+
+    .brand-subtitle {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #2d6a4f;
+      margin: 0;
+      letter-spacing: 0.2px;
+    }
+  }
+
+  .loading-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    ion-spinner {
+      --color: #1a4d2e;
+      transform: scale(1.2);
+    }
+
+    .loading-text {
+      margin-top: 0.8rem;
+      font-size: 0.9rem;
+      color: #475569;
+      font-weight: 500;
+    }
+  }
+}

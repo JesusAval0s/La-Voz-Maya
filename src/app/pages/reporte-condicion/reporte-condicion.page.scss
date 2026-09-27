@@ -1,0 +1,383 @@
+.info-screen-content {
+  --background: #6fe9a1;
+
+  .screen-layout {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    position: relative;
+    overflow-y: hidden;
+  }
+
+  .header-section {
+    padding: 0.6rem 1.4rem 0 1.4rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    .institutional-row {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      .inst-logo {
+        height: 52px;
+        max-width: 95px;
+        object-fit: contain;
+
+        &.left {
+          transform: scale(1.25);
+        }
+
+        &.right {
+          transform: scale(1.35);
+          transform-origin: center right;
+        }
+      }
+    }
+
+    .brand-row {
+      margin-top: -22px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      .maya-logo-main {
+        height: 100px;
+        width: auto;
+        max-width: 175px;
+        object-fit: contain;
+        display: block;
+      }
+    }
+  }
+
+  .content-sheet {
+    flex: 1;
+    background: #ddf4e2;
+    border-top-left-radius: 42px;
+    border-top-right-radius: 42px;
+    padding: 1.1rem 1.1rem 1.6rem 1.1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.04);
+    box-sizing: border-box;
+    overflow: hidden;
+
+    .title-audio-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      margin-bottom: 0.4rem;
+
+      .sheet-title {
+        font-size: 1.3rem;
+        font-weight: 800;
+        color: #173822;
+        margin: 0;
+        letter-spacing: -0.2px;
+      }
+    }
+
+    .title-divider {
+      width: 96%;
+      border: none;
+      height: 1px;
+      background-color: #bcdbc3;
+      margin: 0 0 0.7rem 0;
+    }
+
+    .questions-card-container {
+      width: 100%;
+      flex: 1;
+      min-height: 200px;
+      background: #ffffff;
+      border-radius: 14px;
+      padding: 0.9rem 0.5rem 0.9rem 0.9rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+      margin-bottom: 0.9rem;
+      display: flex;
+      box-sizing: border-box;
+
+      .scroll-body {
+        overflow-y: scroll;
+        padding-right: 0.7rem;
+        width: 100%;
+        -webkit-overflow-scrolling: touch;
+
+        &::-webkit-scrollbar {
+          width: 6px;
+        }
+        &::-webkit-scrollbar-track {
+          background: #f1f1f1;
+          border-radius: 8px;
+        }
+        &::-webkit-scrollbar-thumb {
+          background: #4a6344;
+          border-radius: 8px;
+        }
+      }
+    }
+
+    .print-header-only,
+    .print-footer-only {
+      display: none;
+    }
+
+    .report-content-body {
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      margin-bottom: 1.1rem;
+
+      .report-paragraph {
+        font-size: 0.82rem;
+        color: #222222;
+        line-height: 1.45;
+        margin: 0;
+
+        strong {
+          font-weight: 800;
+
+          &.status-negative,
+          &.status-acceptable {
+            color: #2d6a4f;
+          }
+
+          &.status-positive {
+            color: #dc2626;
+          }
+        }
+      }
+    }
+
+    .helplines-card {
+      background-color: #f7faf8;
+      border: 1px solid #dbe7df;
+      border-radius: 10px;
+      padding: 0.85rem;
+      margin-bottom: 0.5rem;
+
+      .helplines-heading {
+        font-size: 0.82rem;
+        font-weight: 800;
+        color: #173822;
+        margin: 0 0 0.65rem 0;
+        line-height: 1.35;
+      }
+
+      .helplines-list {
+        margin: 0;
+        padding-left: 1.1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+
+        li {
+          font-size: 0.78rem;
+          color: #333333;
+          line-height: 1.35;
+
+          strong {
+            color: #111111;
+            font-weight: 700;
+          }
+        }
+      }
+    }
+
+    .btn-dual-container {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.8rem;
+      flex-wrap: wrap;
+
+      .action-pill-btn {
+        min-height: 46px;
+        padding: 0 1.4rem;
+        border: none;
+        outline: none;
+        border-radius: 50px;
+        cursor: pointer;
+        font-weight: 700;
+        font-size: 0.95rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+        transition: transform 0.15s ease, background-color 0.15s ease;
+
+        &:active {
+          transform: scale(0.97);
+        }
+
+        &.download-btn {
+          background-color: #2d6a4f;
+          color: #ffffff;
+          box-shadow: 0 4px 10px rgba(45, 106, 79, 0.25);
+
+          &:active {
+            background-color: #1b4332;
+          }
+
+          .btn-icon {
+            font-size: 1.1rem;
+          }
+        }
+
+        &.continue-btn {
+          background-color: #1e2f23;
+          color: #ffffff;
+          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+
+          &:active {
+            background-color: #121e16;
+          }
+        }
+      }
+    }
+  }
+}
+
+.soundwave-btn {
+  background: #ffffff !important;
+  border: 1.5px solid #2d6a4f !important;
+  border-radius: 50% !important;
+  width: 28px !important;
+  height: 28px !important;
+  min-width: 28px !important;
+  max-width: 28px !important;
+  min-height: 28px !important;
+  max-height: 28px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  padding: 0 !important;
+  flex-shrink: 0 !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+
+  .wave-icon {
+    width: 16px !important;
+    height: 16px !important;
+    max-width: 16px !important;
+    max-height: 16px !important;
+    object-fit: contain !important;
+    display: block !important;
+  }
+
+  &:active {
+    transform: scale(0.92);
+  }
+
+  &.playing {
+    background: #b7e4c7 !important;
+    animation: wave-pulse 1.2s infinite ease-in-out !important;
+  }
+}
+
+@keyframes wave-pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+
+// ESTILOS DE IMPRESIÓN/PDF
+@media print {
+  body, html {
+    background: #ffffff !important;
+  }
+
+  .header-section,
+  .title-audio-row,
+  .title-divider,
+  .soundwave-btn,
+  .btn-dual-container {
+    display: none !important;
+  }
+
+  .info-screen-content {
+    --background: #ffffff !important;
+  }
+
+  .content-sheet {
+    background: #ffffff !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .questions-card-container {
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+
+    .scroll-body {
+      overflow: visible !important;
+      padding-right: 0 !important;
+    }
+  }
+
+  .print-header-only {
+    display: block !important;
+    text-align: center;
+    margin-bottom: 1.5rem;
+
+    .print-logos-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+
+      .print-logo {
+        height: 55px;
+        object-fit: contain;
+      }
+      .print-logo-maya {
+        height: 70px;
+        object-fit: contain;
+      }
+    }
+
+    .print-doc-title {
+      font-size: 1.4rem;
+      color: #173822;
+      font-weight: 800;
+      margin: 0 0 0.4rem 0;
+    }
+
+    .print-date {
+      font-size: 0.85rem;
+      color: #555555;
+      margin: 0 0 0.8rem 0;
+    }
+
+    .print-divider {
+      border: none;
+      border-top: 1.5px solid #2d6a4f;
+      margin: 0;
+    }
+  }
+
+  .print-footer-only {
+    display: block !important;
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid #cccccc;
+    text-align: center;
+
+    p {
+      font-size: 0.75rem;
+      color: #666666;
+      margin: 0.2rem 0;
+    }
+  }
+}

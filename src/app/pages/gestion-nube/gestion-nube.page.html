@@ -1,0 +1,86 @@
+<ion-content [fullscreen]="true" class="info-screen-content">
+  <div class="screen-layout">
+
+    <!-- CABECERA SIMPLIFICADA (SOLO LOGO LA VOZ MAYA) -->
+    <header class="header-section">
+      <div class="brand-row">
+        <img src="assets/icon/logo-voz-maya.png" alt="La Voz Maya" class="maya-logo-main" />
+      </div>
+    </header>
+
+    <!-- HOJA CURVA INFERIOR -->
+    <main class="content-sheet">
+
+      <!-- TÍTULO DE LA VISTA -->
+      <h1 class="sheet-title">Gestión de Sincronización</h1>
+
+      <!-- BOTÓN SUPERIOR DE SINCRONIZAR TODO (CON ICONO LOCAL) -->
+      <div class="sync-top-container">
+        <button type="button" class="sync-all-pill-btn" (click)="sincronizarTodo()">
+          <span>Sincronizar todo</span>
+          <img src="assets/icon/sincronizar.png" alt="Sincronizar" class="custom-icon-btn" />
+        </button>
+      </div>
+
+      <!-- TARJETA CONTENEDORA CON SCROLL -->
+      <div class="questions-card-container">
+        <div class="scroll-body">
+
+          <!-- BUCLE DE CUESTIONARIOS LOCALES -->
+          <div *ngFor="let item of cuestionarios" 
+               class="record-item-card" 
+               (click)="sincronizarItem(item)">
+            
+            <div class="card-header-row">
+              <span class="folio-text">Folio: {{ item.id }}</span>
+              <span class="date-text">Fecha: {{ item.fecha }}</span>
+            </div>
+
+            <div class="card-body-row">
+              <span class="encuestado-label">Encuestado:</span>
+              <span class="encuestado-name">{{ item.nombreEncuestado }}</span>
+            </div>
+
+            <!-- ESTADOS DINÁMICOS CON TUS ICONOS LOCALES -->
+            <div class="card-footer-row">
+              <span class="status-indicator" [ngClass]="item.estadoSincronizacion">
+                
+                <!-- Sincronizado (palomita) -->
+                <ng-container *ngIf="item.estadoSincronizacion === 'sincronizado'">
+                  Sincronizado <img src="assets/icon/palomita.png" alt="OK" class="status-icon-img" />
+                </ng-container>
+
+                <!-- Guardado Local (palomita) -->
+                <ng-container *ngIf="item.estadoSincronizacion === 'local'">
+                  Guardado Local <img src="assets/icon/palomita.png" alt="OK" class="status-icon-img" />
+                </ng-container>
+
+                <!-- Subiendo a nube (cargando con animación de giro) -->
+                <ng-container *ngIf="item.estadoSincronizacion === 'subiendo'">
+                  Subiendo a nube <img src="assets/icon/cargando.png" alt="Cargando" class="status-icon-img spinning" />
+                </ng-container>
+
+                <!-- Error de Carga (sin-conexion) -->
+                <ng-container *ngIf="item.estadoSincronizacion === 'error'">
+                  Error de Carga <img src="assets/icon/sin-conexion.png" alt="Error" class="status-icon-img" />
+                </ng-container>
+
+              </span>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+
+      <!-- BOTÓN INFERIOR INICIO -->
+      <div class="btn-container">
+        <button type="button" class="action-pill-btn" (click)="irAInicio()">
+          Inicio
+        </button>
+      </div>
+
+    </main>
+
+  </div>
+</ion-content>

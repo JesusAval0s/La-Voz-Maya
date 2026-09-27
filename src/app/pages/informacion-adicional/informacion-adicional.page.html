@@ -1,0 +1,523 @@
+<ion-content [fullscreen]="true" class="info-screen-content">
+  <div class="screen-layout">
+
+    <!-- CABECERA INSTITUCIONAL EN 2 NIVELES -->
+    <header class="header-section">
+      <div class="institutional-row">
+        <img src="assets/icon/logo-centrogeo-1.png" alt="CentroGeo" class="inst-logo left" />
+        <img src="assets/icon/logo-centrogeo-2.png" alt="GeoInt" class="inst-logo right" />
+      </div>
+
+      <div class="brand-row">
+        <img src="assets/icon/logo-voz-maya.png" alt="La Voz Maya" class="maya-logo-main" />
+      </div>
+    </header>
+
+    <!-- HOJA CURVA INFERIOR -->
+    <main class="content-sheet">
+      <h1 class="sheet-title">Información Adicional</h1>
+      <hr class="title-divider" />
+
+      <!-- TARJETA CON SCROLL INTERNO -->
+      <div class="questions-card-container">
+        <div class="scroll-body">
+
+          <!-- PREGUNTA 1 (MÚLTIPLES CON AUDIOS POR RESPUESTA) -->
+          <section class="question-block">
+            <div class="label-audio-row">
+              <span class="field-label">1.- ¿Ha habido en tu familia o círculo cercano algún caso de suicidio, intento de suicidio o autolesión?</span>
+              <button type="button" class="soundwave-btn" [class.playing]="audioActivoKey === 'pregunta_1'" (click)="reproducirAudioPregunta(1)">
+                <img src="assets/icon/onda-sonora.png" alt="Audio" class="wave-icon" />
+              </button>
+            </div>
+            <div class="options-vertical">
+              <div *ngFor="let opt of opcionesP1" class="option-audio-line" (click)="toggleMultiple('p1_suicidio_circulo', opt.texto)">
+                <div class="checkbox-option">
+                  <span class="custom-checkbox" [class.checked]="respuestas.p1_suicidio_circulo.includes(opt.texto)"></span>
+                  <span class="option-label">{{ opt.texto }}</span>
+                </div>
+                <button type="button" class="soundwave-btn micro" 
+                        [class.playing]="audioActivoKey === 'respuesta_' + opt.audioKey" 
+                        (click)="reproducirAudioRespuesta(opt.audioKey, $event)">
+                  <img src="assets/icon/onda-sonora.png" alt="Audio" class="wave-icon" />
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <!-- PREGUNTA 2 (MÚLTIPLES CON AUDIOS POR RESPUESTA) -->
+          <section class="question-block">
+            <div class="label-audio-row">
+              <span class="field-label">2.- ¿Padece alguna de las siguientes enfermedades?</span>
+              <button type="button" class="soundwave-btn" [class.playing]="audioActivoKey === 'pregunta_2'" (click)="reproducirAudioPregunta(2)">
+                <img src="assets/icon/onda-sonora.png" alt="Audio" class="wave-icon" />
+              </button>
+            </div>
+            <div class="options-vertical">
+              <div *ngFor="let enf of opcionesP2" class="option-audio-line" (click)="toggleMultiple('p2_enfermedades', enf.texto)">
+                <div class="checkbox-option">
+                  <span class="custom-checkbox" [class.checked]="respuestas.p2_enfermedades.includes(enf.texto)"></span>
+                  <span class="option-label">{{ enf.texto }}</span>
+                </div>
+                <button type="button" class="soundwave-btn micro" 
+                        [class.playing]="audioActivoKey === 'respuesta_' + enf.audioKey" 
+                        (click)="reproducirAudioRespuesta(enf.audioKey, $event)">
+                  <img src="assets/icon/onda-sonora.png" alt="Audio" class="wave-icon" />
+                </button>
+              </div>
+            </div>
+
+            <div class="other-input-container" *ngIf="respuestas.p2_enfermedades.includes('Otro')">
+              <p class="specify-title">Especifica si seleccionaste 'Otro':</p>
+              <div class="input-mic-row">
+                <input type="text" class="custom-input" placeholder="Escribe tu respuesta..." [(ngModel)]="respuestas.p2_otro_texto" />
+                <button *ngIf="!audiosGrabados['p2']" type="button" class="record-btn" [class.recording]="grabadorActivo === 'p2'" (click)="toggleGrabarAudio('p2')">
+                  <img src="assets/icon/microfono.png" alt="Grabar" class="mic-icon" />
+                </button>
+                <button *ngIf="audiosGrabados['p2']" type="button" class="playback-btn" (click)="escucharGrabacion('p2')">
+                  <img [src]="reproduciendoGrabacion === 'p2' ? 'assets/icon/pausa.png' : 'assets/icon/play.png'" alt="Reproducir" class="play-pause-icon" />
+                </button>
+                <button *ngIf="audiosGrabados['p2']" type="button" class="delete-audio-btn" (click)="eliminarAudio('p2')">✕</button>
+              </div>
+            </div>
+          </section>
+
+          <!-- PREGUNTA 3 (SÍ/NO CON AUDIOS) -->
+          <section class="question-block" [class.has-error-block]="esInvalida('p3')">
+            <div class="label-audio-row">
+              <span class="field-label"><span class="required-asterisk">*</span> 3.- ¿Padeció COVID-19?</span>
+              <button type="button" class="soundwave-btn" [class.playing]="audioActivoKey === 'pregunta_3'" (click)="reproducirAudioPregunta(3)">
+                <img src="assets/icon/onda-sonora.png" alt="Audio" class="wave-icon" />
+              </button>
+            </div>
+            <div class="options-vertical">
+              <div class="option-audio-line" (click)="respuestas.p3_covid = 'SI'">
+                <div class="radio-option">
+                  <span class="custom-radio" [class.checked]="respuestas.p3_covid === 'SI'"></span>
+                  <span class="option-label">SI</span>
+                </div>
+                <button type="button" class="soundwave-btn micro" 
+                        [class.playing]="audioActivoKey === 'respuesta_spn_si'" 
+                        (click)="reproducirAudioRespuesta('spn_si', $event)">
+                  <img src="assets/icon/onda-sonora.png" alt="Audio" class="wave-icon" />
+                </button>
+              </div>
+
+              <div class="option-audio-line" (click)="respuestas.p3_covid = 'NO'">
+                <div class="radio-option">
+                  <span class="custom-radio" [class.checked]="respuestas.p3_covid === 'NO'"></span>
+                  <span class="option-label">NO</span>
+                </div>
+                <button type="button" class="soundwave-btn micro" 
+                        [class.playing]="audioActivoKey === 'respuesta_spn_no'" 
+                        (click)="reproducirAudioRespuesta('spn_no', $event)">
+                  <img src="assets/icon/onda-sonora.png" alt="Audio" class="wave-icon" />
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <!-- PREGUNTA 4 (SELECT COMPACTO CON BOTÓN DE AUDIO DINÁMICO) -->
+          <section class="question-block" [class.has-error-block]="esInvalida('p4')">
+            <div class="label-audio-row">
+              <span class="field-label"><span class="required-asterisk">*</span> 4.- Actualmente ¿con quién vive?</span>
+              <button type="button" class="soundwave-btn" [class.playing]="audioActivoKey === 'pregunta_4'" (click)="reproducirAudioPregunta(4)">
+                <img src="assets/icon/onda-sonora.png" alt="Audio" class="wave-icon" />
+              </button>
+            </div>
+            <div class="select-with-audio-inline">
+              <div class="select-wrapper">
+                <select class="custom-select" [(ngModel)]="respuestas.p4_con_quien_vive">
+                  <option value="" disabled selected>Seleccione una opción...</option>
+                  <option *ngFor="let opt of opcionesP4" [value]="opt.texto">{{ opt.texto }}</option>
+                </select>
+              </div>
+              <button type="button" *ngIf="respuestas.p4_con_quien_vive" 
+                      class="soundwave-btn option-sound-btn" 
+                      [class.playing]="audioActivoKey === 'respuesta_' + getAudioKeyP4()" 
+                      (click)="reproducirAudioRespuesta(getAudioKeyP4())">
+                <img src="assets/icon/onda-sonora.png" alt="Audio respuesta" class="wave-icon" />
+              </button>
+            </div>
+
+            <div class="other-input-container" *ngIf="respuestas.p4_con_quien_vive === 'Otro'">
+              <p class="specify-title">Especifica si seleccionaste 'Otro':</p>
+              <div class="input-mic-row">
+                <input type="text" class="custom-input" placeholder="Escribe tu respuesta..." [(ngModel)]="respuestas.p4_otro_texto" />
+                <button *ngIf="!audiosGrabados['p4']" type="button" class="record-btn" [class.recording]="grabadorActivo === 'p4'" (click)="toggleGrabarAudio('p4')">
+                  <img src="assets/icon/microfono.png" alt="Grabar" class="mic-icon" />
+                </button>
+                <button *ngIf="audiosGrabados['p4']" type="button" class="playback-btn" (click)="escucharGrabacion('p4')">
+                  <img [src]="reproduciendoGrabacion === 'p4' ? 'assets/icon/pausa.png' : 'assets/icon/play.png'" alt="Reproducir" class="play-pause-icon" />
+                </button>
+                <button *ngIf="audiosGrabados['p4']" type="button" class="delete-audio-btn" (click)="eliminarAudio('p4')">✕</button>
+              </div>
+            </div>
+          </section>
+
+          <!-- PREGUNTA 5 (MÚLTIPLES CON AUDIOS POR RESPUESTA) -->
+          <section class="question-block">
+            <div class="label-audio-row">
+              <span class="field-label">5.- ¿Ha experimentado algún tipo de violencia?</span>
+              <button type="button" class="soundwave-btn" [class.playing]="audioActivoKey === 'pregunta_5'" (click)="reproducirAudioPregunta(5)">
+                <img src="assets/icon/onda-sonora.png" alt="Audio" class="wave-icon" />
+              </button>
+            </div>
+            <div class="options-vertical">
+              <div *ngFor="let viol of opcionesP5" class="option-audio-line" (click)="toggleMultiple('p5_violencia', viol.texto)">
+                <div class="checkbox-option">
+                  <span class="custom-checkbox" [class.checked]="respuestas.p5_violencia.includes(viol.texto)"></span>
+                  <span class="option-label">{{ viol.texto }}</span>
+                </div>
+                <button type="button" class="soundwave-btn micro" 
+                        [class.playing]="audioActivoKey === 'respuesta_' + viol.audioKey" 
+                        (click)="reproducirAudioRespuesta(viol.audioKey, $event)">
+                  <img src="assets/icon/onda-sonora.png" alt="Audio" class="wave-icon" />
+                </button>
+              </div>
+            </div>
+
+            <div class="other-input-container" *ngIf="respuestas.p5_violencia.includes('Otra')">
+              <p class="specify-title">Especifica si seleccionaste 'Otra':</p>
+              <div class="input-mic-row">
+                <input type="text" class="custom-input" placeholder="Escribe tu respuesta..." [(ngModel)]="respuestas.p5_otro_texto" />
+                <button *ngIf="!audiosGrabados['p5']" type="button" class="record-btn" [class.recording]="grabadorActivo === 'p5'" (click)="toggleGrabarAudio('p5')">
+                  <img src="assets/icon/microfono.png" alt="Grabar" class="mic-icon" />
+                </button>
+                <button *ngIf="audiosGrabados['p5']" type="button" class="playback-btn" (click)="escucharGrabacion('p5')">
+                  <img [src]="reproduciendoGrabacion === 'p5' ? 'assets/icon/pausa.png' : 'assets/icon/play.png'" alt="Reproducir" class="play-pause-icon" />
+                </button>
+                <button *ngIf="audiosGrabados['p5']" type="button" class="delete-audio-btn" (click)="eliminarAudio('p5')">✕</button>
+              </div>
+            </div>
+          </section>
+
+          <!-- PREGUNTA 6 (OBLIGATORIA CON VALIDACIÓN INDIVIDUAL) -->
+          <section class="question-block" [class.has-error-block]="esInvalida('p6')">
+            <div class="label-audio-row">
+              <span class="field-label">
+                <span class="required-asterisk">*</span> 6.- ¿Cómo califica la relación con sus allegados?
+              </span>
+              <button type="button" class="soundwave-btn" [class.playing]="audioActivoKey === 'pregunta_6'" (click)="reproducirAudioPregunta(6)">
+                <img src="assets/icon/onda-sonora.png" alt="Audio" class="wave-icon" />
+              </button>
+            </div>
+            
+            <div class="compact-relations-list">
+              <!-- Padre -->
+              <div class="compact-relative-row">
+                <span class="relative-compact-label">Padre:</span>
+                <div class="select-with-audio-inline">
+                  <div class="select-wrapper" [class.has-error]="esFamiliarInvalido('padre')">
+                    <select class="custom-select" [(ngModel)]="respuestas.p6_relaciones.padre">
+                      <option value="" disabled selected>Seleccione...</option>
+                      <option *ngFor="let val of opcionesRelacion" [value]="val.texto">{{ val.texto }}</option>
+                    </select>
+                  </div>
+                  <button type="button" *ngIf="respuestas.p6_relaciones.padre" 
+                          class="soundwave-btn option-sound-btn" 
+                          [class.playing]="audioActivoKey === 'respuesta_' + getAudioKeyRelacion(respuestas.p6_relaciones.padre)" 
+                          (click)="reproducirAudioRespuesta(getAudioKeyRelacion(respuestas.p6_relaciones.padre))">
+                    <img src="assets/icon/onda-sonora.png" alt="Audio respuesta" class="wave-icon" />
+                  </button>
+                </div>
+              </div>
+
+              <!-- Madre -->
+              <div class="compact-relative-row">
+                <span class="relative-compact-label">Madre:</span>
+                <div class="select-with-audio-inline">
+                  <div class="select-wrapper" [class.has-error]="esFamiliarInvalido('madre')">
+                    <select class="custom-select" [(ngModel)]="respuestas.p6_relaciones.madre">
+                      <option value="" disabled selected>Seleccione...</option>
+                      <option *ngFor="let val of opcionesRelacion" [value]="val.texto">{{ val.texto }}</option>
+                    </select>
+                  </div>
+                  <button type="button" *ngIf="respuestas.p6_relaciones.madre" 
+                          class="soundwave-btn option-sound-btn" 
+                          [class.playing]="audioActivoKey === 'respuesta_' + getAudioKeyRelacion(respuestas.p6_relaciones.madre)" 
+                          (click)="reproducirAudioRespuesta(getAudioKeyRelacion(respuestas.p6_relaciones.madre))">
+                    <img src="assets/icon/onda-sonora.png" alt="Audio respuesta" class="wave-icon" />
+                  </button>
+                </div>
+              </div>
+
+              <!-- Pareja -->
+              <div class="compact-relative-row">
+                <span class="relative-compact-label">Pareja:</span>
+                <div class="select-with-audio-inline">
+                  <div class="select-wrapper" [class.has-error]="esFamiliarInvalido('pareja')">
+                    <select class="custom-select" [(ngModel)]="respuestas.p6_relaciones.pareja">
+                      <option value="" disabled selected>Seleccione...</option>
+                      <option *ngFor="let val of opcionesRelacion" [value]="val.texto">{{ val.texto }}</option>
+                    </select>
+                  </div>
+                  <button type="button" *ngIf="respuestas.p6_relaciones.pareja" 
+                          class="soundwave-btn option-sound-btn" 
+                          [class.playing]="audioActivoKey === 'respuesta_' + getAudioKeyRelacion(respuestas.p6_relaciones.pareja)" 
+                          (click)="reproducirAudioRespuesta(getAudioKeyRelacion(respuestas.p6_relaciones.pareja))">
+                    <img src="assets/icon/onda-sonora.png" alt="Audio respuesta" class="wave-icon" />
+                  </button>
+                </div>
+              </div>
+
+              <!-- Hijos -->
+              <div class="compact-relative-row">
+                <span class="relative-compact-label">Hijos:</span>
+                <div class="select-with-audio-inline">
+                  <div class="select-wrapper" [class.has-error]="esFamiliarInvalido('hijos')">
+                    <select class="custom-select" [(ngModel)]="respuestas.p6_relaciones.hijos">
+                      <option value="" disabled selected>Seleccione...</option>
+                      <option *ngFor="let val of opcionesRelacion" [value]="val.texto">{{ val.texto }}</option>
+                    </select>
+                  </div>
+                  <button type="button" *ngIf="respuestas.p6_relaciones.hijos" 
+                          class="soundwave-btn option-sound-btn" 
+                          [class.playing]="audioActivoKey === 'respuesta_' + getAudioKeyRelacion(respuestas.p6_relaciones.hijos)" 
+                          (click)="reproducirAudioRespuesta(getAudioKeyRelacion(respuestas.p6_relaciones.hijos))">
+                    <img src="assets/icon/onda-sonora.png" alt="Audio respuesta" class="wave-icon" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- PREGUNTA 7 (OPCIÓN ÚNICA CON AUDIOS) -->
+          <section class="question-block" [class.has-error-block]="esInvalida('p7')">
+            <div class="label-audio-row">
+              <span class="field-label"><span class="required-asterisk">*</span> 7.- ¿Cómo considera su situación económica familiar actual?</span>
+              <button type="button" class="soundwave-btn" [class.playing]="audioActivoKey === 'pregunta_7'" (click)="reproducirAudioPregunta(7)">
+                <img src="assets/icon/onda-sonora.png" alt="Audio" class="wave-icon" />
+              </button>
+            </div>
+            <div class="options-vertical">
+              <div *ngFor="let opt of opcionesP7" class="option-audio-line" (click)="respuestas.p7_situacion_economica = opt.texto">
+                <div class="radio-option">
+                  <span class="custom-radio" [class.checked]="respuestas.p7_situacion_economica === opt.texto"></span>
+                  <span class="option-label">{{ opt.texto }}</span>
+                </div>
+                <button type="button" class="soundwave-btn micro" 
+                        [class.playing]="audioActivoKey === 'respuesta_' + opt.audioKey" 
+                        (click)="reproducirAudioRespuesta(opt.audioKey, $event)">
+                  <img src="assets/icon/onda-sonora.png" alt="Audio" class="wave-icon" />
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <!-- PREGUNTA 8 (SÍ/NO CON AUDIOS) -->
+          <section class="question-block" [class.has-error-block]="esInvalida('p8')">
+            <div class="label-audio-row">
+              <span class="field-label"><span class="required-asterisk">*</span> 8.- ¿Tienes mascotas?</span>
+              <button type="button" class="soundwave-btn" [class.playing]="audioActivoKey === 'pregunta_8'" (click)="reproducirAudioPregunta(8)">
+                <img src="assets/icon/onda-sonora.png" alt="Audio" class="wave-icon" />
+              </button>
+            </div>
+            <div class="options-vertical">
+              <div class="option-audio-line" (click)="respuestas.p8_mascotas = 'SI'">
+                <div class="radio-option">
+                  <span class="custom-radio" [class.checked]="respuestas.p8_mascotas === 'SI'"></span>
+                  <span class="option-label">SI</span>
+                </div>
+                <button type="button" class="soundwave-btn micro" 
+                        [class.playing]="audioActivoKey === 'respuesta_spn_si'" 
+                        (click)="reproducirAudioRespuesta('spn_si', $event)">
+                  <img src="assets/icon/onda-sonora.png" alt="Audio" class="wave-icon" />
+                </button>
+              </div>
+
+              <div class="option-audio-line" (click)="respuestas.p8_mascotas = 'NO'">
+                <div class="radio-option">
+                  <span class="custom-radio" [class.checked]="respuestas.p8_mascotas === 'NO'"></span>
+                  <span class="option-label">NO</span>
+                </div>
+                <button type="button" class="soundwave-btn micro" 
+                        [class.playing]="audioActivoKey === 'respuesta_spn_no'" 
+                        (click)="reproducirAudioRespuesta('spn_no', $event)">
+                  <img src="assets/icon/onda-sonora.png" alt="Audio" class="wave-icon" />
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <!-- PREGUNTA 9 (SIN AUDIO EN RESPUESTAS) -->
+          <section class="question-block" [class.has-error-block]="esInvalida('p9')">
+            <div class="label-audio-row">
+              <span class="field-label"><span class="required-asterisk">*</span> 9.- ¿Cuál es su lengua materna? (la primera lengua que aprendiste en casa durante tu infancia)</span>
+              <button type="button" class="soundwave-btn" [class.playing]="audioActivoKey === 'pregunta_9'" (click)="reproducirAudioPregunta(9)">
+                <img src="assets/icon/onda-sonora.png" alt="Audio" class="wave-icon" />
+              </button>
+            </div>
+            <div class="select-wrapper">
+              <select class="custom-select" [(ngModel)]="respuestas.p9_lengua_materna">
+                <option value="" disabled selected>Seleccione su lengua materna...</option>
+                <option *ngFor="let l of listaLenguas" [value]="l">{{ l }}</option>
+              </select>
+            </div>
+          </section>
+
+          <!-- PREGUNTA 10 (OPCIONAL - SLIDER 0 A 5) -->
+          <section class="question-block">
+            <div class="label-audio-row">
+              <span class="field-label">10.- Pensando en tu día a día, ¿qué tanto usas tu lengua materna?</span>
+              <button type="button" class="soundwave-btn" [class.playing]="audioActivoKey === 'pregunta_10'" (click)="reproducirAudioPregunta(10)">
+                <img src="assets/icon/onda-sonora.png" alt="Audio" class="wave-icon" />
+              </button>
+            </div>
+            <div class="slider-container">
+              <div class="slider-range-row">
+                <span class="range-text left">Nada</span>
+                <input type="range" min="0" max="5" step="1" 
+                       [(ngModel)]="respuestas.p10_uso_lengua" 
+                       class="custom-slider" />
+                <span class="range-text right">Mucho</span>
+              </div>
+              <div class="slider-value-tag">Valor: <strong>{{ respuestas.p10_uso_lengua }}</strong></div>
+            </div>
+          </section>
+
+          <!-- PREGUNTA 11 (OPCIONAL - SLIDER 0 A 5) -->
+          <section class="question-block">
+            <div class="label-audio-row">
+              <span class="field-label">11.- ¿Te has sentido frustrada/o al intentar comunicarte en tu lengua materna?</span>
+              <button type="button" class="soundwave-btn" [class.playing]="audioActivoKey === 'pregunta_11'" (click)="reproducirAudioPregunta(11)">
+                <img src="assets/icon/onda-sonora.png" alt="Audio" class="wave-icon" />
+              </button>
+            </div>
+            <div class="slider-container">
+              <div class="slider-range-row">
+                <span class="range-text left">Nada</span>
+                <input type="range" min="0" max="5" step="1" 
+                       [(ngModel)]="respuestas.p11_frustracion_lengua" 
+                       class="custom-slider" />
+                <span class="range-text right">Mucho</span>
+              </div>
+              <div class="slider-value-tag">Valor: <strong>{{ respuestas.p11_frustracion_lengua }}</strong></div>
+            </div>
+          </section>
+
+          <!-- PREGUNTA 12 (SELECT CON AUDIO DINÁMICO) -->
+          <section class="question-block" [class.has-error-block]="esInvalida('p12')">
+            <div class="label-audio-row">
+              <span class="field-label"><span class="required-asterisk">*</span> 12.- ¿A quién sueles acudir cuando tienes algún problema?</span>
+              <button type="button" class="soundwave-btn" [class.playing]="audioActivoKey === 'pregunta_12'" (click)="reproducirAudioPregunta(12)">
+                <img src="assets/icon/onda-sonora.png" alt="Audio" class="wave-icon" />
+              </button>
+            </div>
+            <div class="select-with-audio-inline">
+              <div class="select-wrapper">
+                <select class="custom-select" [(ngModel)]="respuestas.p12_acude_problema">
+                  <option value="" disabled selected>Seleccione una opción...</option>
+                  <option *ngFor="let opt of opcionesP12" [value]="opt.texto">{{ opt.texto }}</option>
+                </select>
+              </div>
+              <button type="button" *ngIf="respuestas.p12_acude_problema" 
+                      class="soundwave-btn option-sound-btn" 
+                      [class.playing]="audioActivoKey === 'respuesta_' + getAudioKeyP12()" 
+                      (click)="reproducirAudioRespuesta(getAudioKeyP12())">
+                <img src="assets/icon/onda-sonora.png" alt="Audio respuesta" class="wave-icon" />
+              </button>
+            </div>
+
+            <div class="other-input-container" *ngIf="respuestas.p12_acude_problema === 'Otro'">
+              <p class="specify-title">Especifica si seleccionaste 'Otro':</p>
+              <div class="input-mic-row">
+                <input type="text" class="custom-input" placeholder="Escribe tu respuesta..." [(ngModel)]="respuestas.p12_otro_texto" />
+                <button *ngIf="!audiosGrabados['p12']" type="button" class="record-btn" [class.recording]="grabadorActivo === 'p12'" (click)="toggleGrabarAudio('p12')">
+                  <img src="assets/icon/microfono.png" alt="Grabar" class="mic-icon" />
+                </button>
+                <button *ngIf="audiosGrabados['p12']" type="button" class="playback-btn" (click)="escucharGrabacion('p12')">
+                  <img [src]="reproduciendoGrabacion === 'p12' ? 'assets/icon/pausa.png' : 'assets/icon/play.png'" alt="Reproducir" class="play-pause-icon" />
+                </button>
+                <button *ngIf="audiosGrabados['p12']" type="button" class="delete-audio-btn" (click)="eliminarAudio('p12')">✕</button>
+              </div>
+            </div>
+          </section>
+
+          <!-- PREGUNTA 13 (SELECT CON AUDIO DINÁMICO) -->
+          <section class="question-block" [class.has-error-block]="esInvalida('p13')">
+            <div class="label-audio-row">
+              <span class="field-label"><span class="required-asterisk">*</span> 13.- ¿Cuál es tu pasatiempo principal?</span>
+              <button type="button" class="soundwave-btn" [class.playing]="audioActivoKey === 'pregunta_13'" (click)="reproducirAudioPregunta(13)">
+                <img src="assets/icon/onda-sonora.png" alt="Audio" class="wave-icon" />
+              </button>
+            </div>
+            <div class="select-with-audio-inline">
+              <div class="select-wrapper">
+                <select class="custom-select" [(ngModel)]="respuestas.p13_pasatiempo">
+                  <option value="" disabled selected>Seleccione su pasatiempo principal...</option>
+                  <option *ngFor="let opt of opcionesP13" [value]="opt.texto">{{ opt.texto }}</option>
+                </select>
+              </div>
+              <button type="button" *ngIf="respuestas.p13_pasatiempo" 
+                      class="soundwave-btn option-sound-btn" 
+                      [class.playing]="audioActivoKey === 'respuesta_' + getAudioKeyP13()" 
+                      (click)="reproducirAudioRespuesta(getAudioKeyP13())">
+                <img src="assets/icon/onda-sonora.png" alt="Audio respuesta" class="wave-icon" />
+              </button>
+            </div>
+
+            <div class="other-input-container" *ngIf="respuestas.p13_pasatiempo === 'Otro'">
+              <p class="specify-title">Especifica si seleccionaste 'Otro':</p>
+              <div class="input-mic-row">
+                <input type="text" class="custom-input" placeholder="Escribe tu respuesta..." [(ngModel)]="respuestas.p13_otro_texto" />
+                <button *ngIf="!audiosGrabados['p13']" type="button" class="record-btn" [class.recording]="grabadorActivo === 'p13'" (click)="toggleGrabarAudio('p13')">
+                  <img src="assets/icon/microfono.png" alt="Grabar" class="mic-icon" />
+                </button>
+                <button *ngIf="audiosGrabados['p13']" type="button" class="playback-btn" (click)="escucharGrabacion('p13')">
+                  <img [src]="reproduciendoGrabacion === 'p13' ? 'assets/icon/pausa.png' : 'assets/icon/play.png'" alt="Reproducir" class="play-pause-icon" />
+                </button>
+                <button *ngIf="audiosGrabados['p13']" type="button" class="delete-audio-btn" (click)="eliminarAudio('p13')">✕</button>
+              </div>
+            </div>
+          </section>
+
+          <!-- PREGUNTA 14 (SÍ/NO CON AUDIOS) -->
+          <section class="question-block" [class.has-error-block]="esInvalida('p14')">
+            <div class="label-audio-row">
+              <span class="field-label"><span class="required-asterisk">*</span> 14.- ¿Sueles consumir algún tipo de bebida energética?</span>
+              <button type="button" class="soundwave-btn" [class.playing]="audioActivoKey === 'pregunta_14'" (click)="reproducirAudioPregunta(14)">
+                <img src="assets/icon/onda-sonora.png" alt="Audio" class="wave-icon" />
+              </button>
+            </div>
+            <div class="options-vertical">
+              <div class="option-audio-line" (click)="respuestas.p14_bebida_energetica = 'SI'">
+                <div class="radio-option">
+                  <span class="custom-radio" [class.checked]="respuestas.p14_bebida_energetica === 'SI'"></span>
+                  <span class="option-label">SI</span>
+                </div>
+                <button type="button" class="soundwave-btn micro" 
+                        [class.playing]="audioActivoKey === 'respuesta_spn_si'" 
+                        (click)="reproducirAudioRespuesta('spn_si', $event)">
+                  <img src="assets/icon/onda-sonora.png" alt="Audio" class="wave-icon" />
+                </button>
+              </div>
+
+              <div class="option-audio-line" (click)="respuestas.p14_bebida_energetica = 'NO'">
+                <div class="radio-option">
+                  <span class="custom-radio" [class.checked]="respuestas.p14_bebida_energetica === 'NO'"></span>
+                  <span class="option-label">NO</span>
+                </div>
+                <button type="button" class="soundwave-btn micro" 
+                        [class.playing]="audioActivoKey === 'respuesta_spn_no'" 
+                        (click)="reproducirAudioRespuesta('spn_no', $event)">
+                  <img src="assets/icon/onda-sonora.png" alt="Audio" class="wave-icon" />
+                </button>
+              </div>
+            </div>
+          </section>
+
+        </div>
+      </div>
+
+      <!-- BOTÓN GUARDAR Y CONTINUAR -->
+      <div class="btn-container">
+        <button type="button" class="action-pill-btn" (click)="guardarYContinuar()">
+          Guardar y Continuar
+        </button>
+      </div>
+
+    </main>
+
+  </div>
+</ion-content>

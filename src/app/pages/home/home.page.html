@@ -1,0 +1,74 @@
+<ion-content [fullscreen]="true" class="main-screen-content">
+  <div class="screen-layout">
+
+    <!-- CABECERA VERDE MENTA -->
+    <header class="header-section">
+      <!-- 3 LOGOS INSTITUCIONALES ORDENADOS -->
+      <div class="institutional-logos">
+        <img 
+          src="/assets/icon/logo-centrogeo-2.png" 
+          alt="GeoInt" 
+          class="inst-logo left"
+        />
+        <img 
+          src="/assets/icon/logo-centrogeo-1.png" 
+          alt="CentroGeo" 
+          class="inst-logo center"
+        />
+        <img 
+          src="/assets/icon/asociacion-sofia.png" 
+          alt="Asociación Sofía" 
+          class="inst-logo right"
+        />
+      </div>
+
+      <!-- LOGO PRINCIPAL ABAJO EN EL CENTRO -->
+      <div class="main-identity">
+        <img 
+          src="/assets/icon/logo-voz-maya.png" 
+          alt="La Voz Maya" 
+          class="maya-logo"
+        />
+      </div>
+
+      <!-- BOTÓN DE NUBE DE SINCRONIZACIÓN -->
+      <div class="cloud-anchor">
+        <button 
+          type="button"
+          class="cloud-btn" 
+          (click)="abrirGestionNube()"
+          aria-label="Ir a gestión de sincronización"
+        >
+          <ion-icon name="cloud-upload-outline"></ion-icon>
+          <span class="badge" *ngIf="pendingCount > 0">
+            {{ pendingCount }}
+          </span>
+        </button>
+      </div>
+    </header>
+
+    <!-- TARJETA INFERIOR CURVA -->
+    <main class="content-sheet">
+      <div class="sheet-inner">
+        <h1 class="sheet-title">
+          Cuestionario para la valoración de salud mental de adultos
+        </h1>
+
+        <p class="sheet-instruction">
+          Presiona el botón para comenzar a responder las preguntas
+        </p>
+
+        <div class="btn-container">
+          <button 
+            type="button"
+            class="survey-custom-pill"
+            (click)="startSurvey()"
+          >
+            Responder encuesta
+          </button>
+        </div>
+      </div>
+    </main>
+
+  </div>
+</ion-content>

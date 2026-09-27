@@ -1,0 +1,110 @@
+<ion-content [fullscreen]="true" class="info-screen-content">
+  <div class="screen-layout">
+
+    <!-- CABECERA INSTITUCIONAL EN 2 NIVELES -->
+    <header class="header-section">
+      <div class="institutional-row">
+        <img src="assets/icon/logo-centrogeo-1.png" alt="CentroGeo" class="inst-logo left" />
+        <img src="assets/icon/logo-centrogeo-2.png" alt="GeoInt" class="inst-logo right" />
+      </div>
+
+      <div class="brand-row">
+        <img src="assets/icon/logo-voz-maya.png" alt="La Voz Maya" class="maya-logo-main" />
+      </div>
+    </header>
+
+    <!-- HOJA CURVA INFERIOR -->
+    <main class="content-sheet">
+
+      <!-- TÍTULO CON BOTÓN ÚNICO DE AUDIO -->
+      <div class="title-audio-row">
+        <h1 class="sheet-title">Resultado de la Evaluación</h1>
+        <button type="button" 
+                class="soundwave-btn" 
+                [class.playing]="reproduciendo" 
+                (click)="toggleAudioReporte()" 
+                title="Escuchar resultado de la evaluación">
+          <img src="assets/icon/onda-sonora.png" alt="Audio" class="wave-icon" />
+        </button>
+      </div>
+
+      <hr class="title-divider" />
+
+      <!-- TARJETA CON SCROLL INTERNO / IMPRIMIBLE -->
+      <div class="questions-card-container" id="printable-report">
+        <div class="scroll-body">
+
+          <!-- ENCABEZADO EXCLUSIVO PARA IMPRESIÓN/PDF -->
+          <div class="print-header-only">
+            <div class="print-logos-row">
+              <img src="assets/icon/logo-centrogeo-1.png" alt="CentroGeo" class="print-logo" />
+              <img src="assets/icon/logo-voz-maya.png" alt="La Voz Maya" class="print-logo-maya" />
+              <img src="assets/icon/logo-centrogeo-2.png" alt="GeoInt" class="print-logo" />
+            </div>
+            <h2 class="print-doc-title">Reporte de Evaluación de Salud Emocional</h2>
+            <p class="print-date">Fecha de Emisión: {{ fechaReporte }}</p>
+            <hr class="print-divider" />
+          </div>
+
+          <!-- PÁRRAFOS DE RESULTADOS -->
+          <div class="report-content-body">
+            <p class="report-paragraph">
+              Dados los resultados obtenidos en el cuestionario para la detección de depresión, sus indicadores indican una detección 
+              <strong [class.status-positive]="deteccionDepresion === 'POSITIVA'" [class.status-negative]="deteccionDepresion === 'NEGATIVA'">
+                {{ deteccionDepresion }}
+              </strong>. 
+              De todas formas, si en algún momento requiere apoyo a su salud mental, no dude en pedir ayuda.
+            </p>
+
+            <p class="report-paragraph">
+              Dados los resultados obtenidos en el cuestionario para la evaluación del trastorno de ansiedad, sus indicadores indican una detección 
+              <strong [class.status-positive]="deteccionAnsiedad === 'POSITIVA'" [class.status-negative]="deteccionAnsiedad === 'NEGATIVA'">
+                {{ deteccionAnsiedad }}
+              </strong>. 
+              De todas formas, si en algún momento requiere apoyo a su salud mental, no dude en pedir ayuda.
+            </p>
+
+            <p class="report-paragraph">
+              Dados los resultados obtenidos en esta valoración, sus indicadores se encuentran dentro de los 
+              <strong [class.status-acceptable]="valoracionGeneral === 'RANGOS ACEPTABLES'" [class.status-positive]="valoracionGeneral === 'REQUIERE ATENCIÓN'">
+                {{ valoracionGeneral }}
+              </strong>. 
+              De todas formas, si en algún momento requiere apoyo a su salud mental, no dude en pedir ayuda.
+            </p>
+          </div>
+
+          <!-- LÍNEAS TELEFÓNICAS DE APOYO INSTITUCIONAL -->
+          <div class="helplines-card">
+            <h3 class="helplines-heading">Te compartimos las líneas telefónicas para tu salud y bienestar:</h3>
+            <ul class="helplines-list">
+              <li><strong>Línea de orientación y apoyo emocional gratuita y confidencial:</strong> 800 108 80 00 (24 horas, 7 días de la semana).</li>
+              <li><strong>Línea de la vida:</strong> 800 911 2000 (24 horas del día, los 365 días del año).</li>
+              <li><strong>Línea Mujer:</strong> (999) 923 09 73 y 800 455 7672 (24 horas).</li>
+              <li><strong>Emergencias:</strong> 911 (24 horas).</li>
+              <li><strong>UNESPAVIFAG:</strong> 999 9 42 00 70 Ext. 83037 (24 horas).</li>
+            </ul>
+          </div>
+
+          <!-- PIE DE PÁGINA EXCLUSIVO PARA IMPRESIÓN/PDF -->
+          <div class="print-footer-only">
+            <p>Centro de Investigación en Ciencias de Información Geoespacial, A.C. (CentroGeo) - Proyecto La Voz Maya</p>
+            <p>Este informe es confidencial y tiene fines de orientación preventiva.</p>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- BOTONERA INFERIOR -->
+      <div class="btn-dual-container">
+        <button type="button" class="action-pill-btn download-btn" (click)="descargarPdf()">
+          <span class="btn-icon">📥</span> Descargar PDF
+        </button>
+        <button type="button" class="action-pill-btn continue-btn" (click)="continuar()">
+          Continuar
+        </button>
+      </div>
+
+    </main>
+
+  </div>
+</ion-content>

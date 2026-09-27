@@ -1,0 +1,276 @@
+.consent-screen-content {
+  --background: #6fe9a1;
+
+  .screen-layout {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    position: relative;
+    overflow-y: hidden; // Evita scroll exterior indeseado en la página
+  }
+
+  // --- CABECERA SUPERIOR OPTIMIZADA ---
+  .header-section {
+    padding: 0.2rem 1.4rem 0 1.4rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    min-height: 110px;
+
+    .brand-row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: -5px;
+
+      .maya-logo-main {
+        height: 105px;
+        width: auto;
+        max-width: 190px;
+        object-fit: contain;
+        display: block;
+      }
+    }
+  }
+
+  // --- HOJA CURVA INFERIOR ---
+  .content-sheet {
+    flex: 1;
+    background: #ddf4e2;
+    border-top-left-radius: 42px;
+    border-top-right-radius: 42px;
+    padding: 1.3rem 1.3rem 1.8rem 1.3rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.04);
+    box-sizing: border-box;
+    overflow: hidden;
+
+    .sheet-title {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #173822;
+      text-align: center;
+      margin: 0 0 0.6rem 0;
+      letter-spacing: -0.2px;
+    }
+
+    .title-divider {
+      width: 96%;
+      border: none;
+      height: 1px;
+      background-color: #bcdbc3;
+      margin: 0 0 0.8rem 0;
+    }
+
+    // CUADRO DE ATENCIÓN CON BOTÓN DE AUDIO
+    .attention-box {
+      width: 100%;
+      background: #fde8d4;
+      border-radius: 8px;
+      padding: 0.5rem 0.8rem;
+      margin-bottom: 0.8rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.6rem;
+      box-sizing: border-box;
+
+      .attention-text {
+        flex: 1;
+
+        p {
+          margin: 0;
+          font-size: 0.76rem;
+          color: #61402b;
+          line-height: 1.3;
+
+          strong {
+            font-weight: 800;
+          }
+        }
+      }
+
+      .soundwave-btn {
+        background: #ffffff;
+        border: 1.5px solid #2d6a4f;
+        border-radius: 50%;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        padding: 0;
+        flex-shrink: 0;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        transition: transform 0.15s ease, background-color 0.2s ease;
+
+        .wave-icon {
+          width: 20px;
+          height: 20px;
+          object-fit: contain;
+        }
+
+        &:active {
+          transform: scale(0.92);
+        }
+
+        &.playing {
+          background: #b7e4c7;
+          animation: wave-pulse 1.2s infinite ease-in-out;
+        }
+      }
+    }
+
+    // TARJETA DE TEXTO CON SCROLLBAR DESLIZABLE
+    .text-card-container {
+      width: 100%;
+      flex: 1;
+      min-height: 180px;
+      background: #ffffff;
+      border-radius: 14px;
+      padding: 1rem 0.6rem 1rem 1.1rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+      margin-bottom: 0.9rem;
+      display: flex;
+      box-sizing: border-box;
+
+      .scroll-body {
+        overflow-y: scroll;
+        padding-right: 0.8rem;
+        width: 100%;
+        -webkit-overflow-scrolling: touch;
+
+        &::-webkit-scrollbar {
+          width: 6px;
+        }
+        &::-webkit-scrollbar-track {
+          background: #f1f1f1;
+          border-radius: 8px;
+        }
+        &::-webkit-scrollbar-thumb {
+          background: #4a6344;
+          border-radius: 8px;
+        }
+
+        .participant-heading {
+          font-size: 0.98rem;
+          font-weight: 800;
+          color: #111111;
+          margin: 0 0 0.5rem 0;
+        }
+
+        .body-text {
+          font-size: 0.84rem;
+          line-height: 1.42;
+          color: #333333;
+          font-weight: 500;
+          margin: 0 0 0.8rem 0;
+
+          &:last-child {
+            margin-bottom: 0;
+          }
+        }
+      }
+    }
+
+    // TARJETA DE DECISIÓN (SÍ / NO)
+    .decision-card {
+      width: 100%;
+      background: #ffffff;
+      border-radius: 14px;
+      padding: 0.8rem 1.1rem;
+      margin-bottom: 1.1rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+      transition: background-color 0.25s ease;
+      box-sizing: border-box;
+
+      &.has-error {
+        background: #fbb686 !important;
+      }
+
+      .decision-question {
+        font-size: 0.82rem;
+        font-weight: 800;
+        color: #111111;
+        margin: 0 0 0.65rem 0;
+        line-height: 1.3;
+      }
+
+      .radio-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.55rem;
+
+        .radio-option {
+          display: flex;
+          align-items: center;
+          gap: 0.65rem;
+          cursor: pointer;
+          user-select: none;
+
+          .custom-radio {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: #d1d5db;
+            display: inline-block;
+            transition: all 0.2s ease;
+
+            &.checked {
+              background: #1e2f23;
+              border: 3px solid #d1d5db;
+            }
+          }
+
+          .radio-label {
+            font-size: 0.82rem;
+            font-weight: 800;
+            color: #111111;
+            letter-spacing: 0.3px;
+          }
+        }
+      }
+    }
+
+    // BOTÓN DE ACCIÓN TIPO PASTILLA
+    .btn-container {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+
+      .action-pill-btn {
+        background-color: #1e2f23;
+        color: #ffffff;
+        font-family: inherit;
+        font-weight: 700;
+        font-size: 1.1rem;
+        min-height: 50px;
+        min-width: 225px;
+        padding: 0 2rem;
+        border: none;
+        outline: none;
+        border-radius: 50px;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+        transition: transform 0.15s ease, background-color 0.15s ease;
+        -webkit-tap-highlight-color: transparent;
+
+        &:active {
+          transform: scale(0.97);
+          background-color: #121e16;
+        }
+      }
+    }
+  }
+}
+
+@keyframes wave-pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}

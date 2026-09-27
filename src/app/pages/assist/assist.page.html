@@ -1,0 +1,324 @@
+<ion-content [fullscreen]="true" class="info-screen-content">
+  <div class="screen-layout">
+
+    <!-- CABECERA INSTITUCIONAL EN 2 NIVELES -->
+    <header class="header-section">
+      <div class="institutional-row">
+        <img src="assets/icon/logo-centrogeo-1.png" alt="CentroGeo" class="inst-logo left" />
+        <img src="assets/icon/logo-centrogeo-2.png" alt="GeoInt" class="inst-logo right" />
+      </div>
+
+      <div class="brand-row">
+        <img src="assets/icon/logo-voz-maya.png" alt="La Voz Maya" class="maya-logo-main" />
+      </div>
+    </header>
+
+    <!-- HOJA CURVA INFERIOR -->
+    <main class="content-sheet">
+      <h1 class="sheet-title">Prueba de Detección ASSIST v3.1</h1>
+      <p class="sheet-subtitle">Detección de consumo de Alcohol, Tabaco y Sustancias</p>
+      <hr class="title-divider" />
+
+      <!-- TARJETA CON SCROLL INTERNO -->
+      <div class="questions-card-container">
+        <div class="scroll-body">
+
+          <!-- RECUADRO DE INSTRUCCIONES -->
+          <div class="instructions-banner">
+            <p class="instructions-text">
+              <strong>Instrucciones:</strong> Las siguientes preguntas hacen referencia al consumo de sustancias a lo largo de su vida y en los últimos 3 meses.
+            </p>
+          </div>
+
+          <!-- TABLA WEB: PREGUNTAS 1 Y 2 -->
+          <section class="question-block" [class.has-error-block]="esInvalida('p1_p2')">
+            <div class="label-audio-row">
+              <span class="field-label">
+                <span class="required-asterisk">*</span> 1 y 2. Consumo de sustancias
+              </span>
+            </div>
+
+            <div class="table-responsive-wrapper" #tableWrapper>
+              <table class="assist-table">
+                <thead>
+                  <tr>
+                    <th class="col-substance">
+                      <div class="th-content-row">
+                        <span>Sustancia</span>
+                        <button type="button" 
+                                class="soundwave-btn mini" 
+                                [class.playing]="audioActivoKey === 'spn_sustancia'" 
+                                (click)="reproducirAudio('spn_sustancia')">
+                          <img src="assets/icon/onda-sonora.png" alt="Audio" class="wave-icon" />
+                        </button>
+                      </div>
+                    </th>
+                    <th class="col-q1">
+                      <div class="th-content-row">
+                        <span>1. ¿Alguna vez la ha consumido?</span>
+                        <button type="button" 
+                                class="soundwave-btn mini" 
+                                [class.playing]="audioActivoKey === 'spn_1_assist'" 
+                                (click)="reproducirAudio(1)">
+                          <img src="assets/icon/onda-sonora.png" alt="Audio" class="wave-icon" />
+                        </button>
+                      </div>
+                    </th>
+                    <th class="col-q2">
+                      <div class="th-content-row">
+                        <span>2. Frecuencia en los últimos 3 meses</span>
+                        <button type="button" 
+                                class="soundwave-btn mini" 
+                                [class.playing]="audioActivoKey === 'spn_2_assist'" 
+                                (click)="reproducirAudio(2)">
+                          <img src="assets/icon/onda-sonora.png" alt="Audio" class="wave-icon" />
+                        </button>
+                      </div>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let s of sustancias">
+                    <td class="substance-label-cell">
+                      <div class="substance-row-content">
+                        <span>{{ s.nombre }}</span>
+                        <button type="button" 
+                                class="soundwave-btn micro" 
+                                [class.playing]="audioActivoKey === s.audioKey" 
+                                (click)="reproducirAudio(s.audioKey)">
+                          <img src="assets/icon/onda-sonora.png" alt="Audio" class="wave-icon" />
+                        </button>
+                      </div>
+                    </td>
+                    <td class="select-cell">
+                      <div class="select-with-audio-inline">
+                        <div class="table-select-wrapper">
+                          <select class="web-select" [(ngModel)]="respuestas.p1[s.id]" (change)="onChangeQ1(s.id)">
+                            <option *ngFor="let opt of opcionesQ1" [value]="opt.texto">{{ opt.texto }}</option>
+                          </select>
+                        </div>
+                        <button type="button" *ngIf="respuestas.p1[s.id]" 
+                                class="soundwave-btn micro" 
+                                [class.playing]="audioActivoKey === 'respuesta_' + (respuestas.p1[s.id] === 'Sí' ? 'spn_si' : 'spn_no')" 
+                                (click)="reproducirAudioRespuesta(respuestas.p1[s.id] === 'Sí' ? 'spn_si' : 'spn_no', $event)">
+                          <img src="assets/icon/onda-sonora.png" alt="Audio" class="wave-icon" />
+                        </button>
+                      </div>
+                    </td>
+                    <td class="select-cell">
+                      <div class="select-with-audio-inline" *ngIf="respuestas.p1[s.id] === 'Sí'">
+                        <div class="table-select-wrapper">
+                          <select class="web-select" [(ngModel)]="respuestas.p2[s.id]">
+                            <option value="" disabled selected>Seleccione...</option>
+                            <option *ngFor="let opt of opcionesQ2" [value]="opt.texto">{{ opt.texto }}</option>
+                          </select>
+                        </div>
+                        <button type="button" *ngIf="respuestas.p2[s.id]" 
+                                class="soundwave-btn micro" 
+                                [class.playing]="audioActivoKey === 'respuesta_' + getAudioKeyQ2(respuestas.p2[s.id])" 
+                                (click)="reproducirAudioRespuesta(getAudioKeyQ2(respuestas.p2[s.id]), $event)">
+                          <img src="assets/icon/onda-sonora.png" alt="Audio" class="wave-icon" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <!-- PREGUNTA 3 -->
+          <section class="question-block" *ngIf="sustanciasConsumoReciente.length > 0" [class.has-error-block]="esInvalida('p3')">
+            <div class="label-audio-row">
+              <span class="field-label purple-title">
+                <span class="required-asterisk">*</span> 3. En los últimos tres meses, ¿con qué frecuencia ha sentido un fuerte deseo o ansia de consumir?
+              </span>
+              <button type="button" class="soundwave-btn" [class.playing]="audioActivoKey === 'spn_3_assist'" (click)="reproducirAudio(3)">
+                <img src="assets/icon/onda-sonora.png" alt="Audio" class="wave-icon" />
+              </button>
+            </div>
+            <div class="conditional-substance-list">
+              <div class="conditional-item" *ngFor="let s of sustanciasConsumoReciente">
+                <label class="item-substance-name">{{ s.nombre }}:</label>
+                <div class="select-with-audio-inline">
+                  <div class="table-select-wrapper full-width">
+                    <select class="web-select" [(ngModel)]="respuestas.p3[s.id]">
+                      <option value="" disabled selected>Seleccione...</option>
+                      <option *ngFor="let opt of opcionesQ3Q4Q5" [value]="opt.texto">{{ opt.texto }}</option>
+                    </select>
+                  </div>
+                  <button type="button" *ngIf="respuestas.p3[s.id]" 
+                          class="soundwave-btn micro" 
+                          [class.playing]="audioActivoKey === 'respuesta_' + getAudioKeyQ3Q4Q5(respuestas.p3[s.id])" 
+                          (click)="reproducirAudioRespuesta(getAudioKeyQ3Q4Q5(respuestas.p3[s.id]), $event)">
+                    <img src="assets/icon/onda-sonora.png" alt="Audio" class="wave-icon" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- PREGUNTA 4 -->
+          <section class="question-block" *ngIf="sustanciasConsumoReciente.length > 0" [class.has-error-block]="esInvalida('p4')">
+            <div class="label-audio-row">
+              <span class="field-label purple-title">
+                <span class="required-asterisk">*</span> 4. En los últimos tres meses, ¿con qué frecuencia el consumo le ha causado problemas de salud, sociales, legales o económicos?
+              </span>
+              <button type="button" class="soundwave-btn" [class.playing]="audioActivoKey === 'spn_4_assist'" (click)="reproducirAudio(4)">
+                <img src="assets/icon/onda-sonora.png" alt="Audio" class="wave-icon" />
+              </button>
+            </div>
+            <div class="conditional-substance-list">
+              <div class="conditional-item" *ngFor="let s of sustanciasConsumoReciente">
+                <label class="item-substance-name">{{ s.nombre }}:</label>
+                <div class="select-with-audio-inline">
+                  <div class="table-select-wrapper full-width">
+                    <select class="web-select" [(ngModel)]="respuestas.p4[s.id]">
+                      <option value="" disabled selected>Seleccione...</option>
+                      <option *ngFor="let opt of opcionesQ3Q4Q5" [value]="opt.texto">{{ opt.texto }}</option>
+                    </select>
+                  </div>
+                  <button type="button" *ngIf="respuestas.p4[s.id]" 
+                          class="soundwave-btn micro" 
+                          [class.playing]="audioActivoKey === 'respuesta_' + getAudioKeyQ3Q4Q5(respuestas.p4[s.id])" 
+                          (click)="reproducirAudioRespuesta(getAudioKeyQ3Q4Q5(respuestas.p4[s.id]), $event)">
+                    <img src="assets/icon/onda-sonora.png" alt="Audio" class="wave-icon" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- PREGUNTA 5 -->
+          <section class="question-block" *ngIf="sustanciasConsumoRecienteSinTabaco.length > 0" [class.has-error-block]="esInvalida('p5')">
+            <div class="label-audio-row">
+              <span class="field-label purple-title">
+                <span class="required-asterisk">*</span> 5. En los últimos tres meses, ¿con qué frecuencia dejó de hacer lo que habitualmente se esperaba de usted por el consumo de...?
+              </span>
+              <button type="button" class="soundwave-btn" [class.playing]="audioActivoKey === 'spn_5_assist'" (click)="reproducirAudio(5)">
+                <img src="assets/icon/onda-sonora.png" alt="Audio" class="wave-icon" />
+              </button>
+            </div>
+            <div class="conditional-substance-list">
+              <div class="conditional-item" *ngFor="let s of sustanciasConsumoRecienteSinTabaco">
+                <label class="item-substance-name">{{ s.nombre }}:</label>
+                <div class="select-with-audio-inline">
+                  <div class="table-select-wrapper full-width">
+                    <select class="web-select" [(ngModel)]="respuestas.p5[s.id]">
+                      <option value="" disabled selected>Seleccione...</option>
+                      <option *ngFor="let opt of opcionesQ3Q4Q5" [value]="opt.texto">{{ opt.texto }}</option>
+                    </select>
+                  </div>
+                  <button type="button" *ngIf="respuestas.p5[s.id]" 
+                          class="soundwave-btn micro" 
+                          [class.playing]="audioActivoKey === 'respuesta_' + getAudioKeyQ3Q4Q5(respuestas.p5[s.id])" 
+                          (click)="reproducirAudioRespuesta(getAudioKeyQ3Q4Q5(respuestas.p5[s.id]), $event)">
+                    <img src="assets/icon/onda-sonora.png" alt="Audio" class="wave-icon" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- PREGUNTA 6 -->
+          <section class="question-block" *ngIf="sustanciasConsumoVida.length > 0" [class.has-error-block]="esInvalida('p6')">
+            <div class="label-audio-row">
+              <span class="field-label purple-title">
+                <span class="required-asterisk">*</span> 6. ¿Un amigo, un familiar o alguien más alguna vez ha mostrado preocupación por sus hábitos de consumo de...?
+              </span>
+              <button type="button" class="soundwave-btn" [class.playing]="audioActivoKey === 'spn_6_assist'" (click)="reproducirAudio(6)">
+                <img src="assets/icon/onda-sonora.png" alt="Audio" class="wave-icon" />
+              </button>
+            </div>
+            <div class="conditional-substance-list">
+              <div class="conditional-item" *ngFor="let s of sustanciasConsumoVida">
+                <label class="item-substance-name">{{ s.nombre }}:</label>
+                <div class="select-with-audio-inline">
+                  <div class="table-select-wrapper full-width">
+                    <select class="web-select" [(ngModel)]="respuestas.p6[s.id]">
+                      <option value="" disabled selected>Seleccione...</option>
+                      <option *ngFor="let opt of opcionesQ6Q7" [value]="opt.texto">{{ opt.texto }}</option>
+                    </select>
+                  </div>
+                  <button type="button" *ngIf="respuestas.p6[s.id]" 
+                          class="soundwave-btn micro" 
+                          [class.playing]="audioActivoKey === 'respuesta_' + getAudioKeyQ6Q7(respuestas.p6[s.id])" 
+                          (click)="reproducirAudioRespuesta(getAudioKeyQ6Q7(respuestas.p6[s.id]), $event)">
+                    <img src="assets/icon/onda-sonora.png" alt="Audio" class="wave-icon" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- PREGUNTA 7 -->
+          <section class="question-block" *ngIf="sustanciasConsumoVida.length > 0" [class.has-error-block]="esInvalida('p7')">
+            <div class="label-audio-row">
+              <span class="field-label purple-title">
+                <span class="required-asterisk">*</span> 7. ¿Ha intentado alguna vez reducir o eliminar el consumo de...?
+              </span>
+              <button type="button" class="soundwave-btn" [class.playing]="audioActivoKey === 'spn_7_assist'" (click)="reproducirAudio(7)">
+                <img src="assets/icon/onda-sonora.png" alt="Audio" class="wave-icon" />
+              </button>
+            </div>
+            <div class="conditional-substance-list">
+              <div class="conditional-item" *ngFor="let s of sustanciasConsumoVida">
+                <label class="item-substance-name">{{ s.nombre }}:</label>
+                <div class="select-with-audio-inline">
+                  <div class="table-select-wrapper full-width">
+                    <select class="web-select" [(ngModel)]="respuestas.p7[s.id]">
+                      <option value="" disabled selected>Seleccione...</option>
+                      <option *ngFor="let opt of opcionesQ6Q7" [value]="opt.texto">{{ opt.texto }}</option>
+                    </select>
+                  </div>
+                  <button type="button" *ngIf="respuestas.p7[s.id]" 
+                          class="soundwave-btn micro" 
+                          [class.playing]="audioActivoKey === 'respuesta_' + getAudioKeyQ6Q7(respuestas.p7[s.id])" 
+                          (click)="reproducirAudioRespuesta(getAudioKeyQ6Q7(respuestas.p7[s.id]), $event)">
+                    <img src="assets/icon/onda-sonora.png" alt="Audio" class="wave-icon" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- PREGUNTA 8 -->
+          <section class="question-block" *ngIf="sustanciasConsumoVida.length > 0" [class.has-error-block]="esInvalida('p8')">
+            <div class="label-audio-row">
+              <span class="field-label purple-title">
+                <span class="required-asterisk">*</span> 8. ¿Alguna vez ha consumido alguna droga por vía inyectada?
+              </span>
+              <button type="button" class="soundwave-btn" [class.playing]="audioActivoKey === 'spn_8_assist'" (click)="reproducirAudio(8)">
+                <img src="assets/icon/onda-sonora.png" alt="Audio" class="wave-icon" />
+              </button>
+            </div>
+            <div class="select-with-audio-inline">
+              <div class="table-select-wrapper full-width">
+                <select class="web-select" [(ngModel)]="respuestas.p8">
+                  <option value="" disabled selected>Seleccione...</option>
+                  <option *ngFor="let opt of opcionesQ8" [value]="opt.texto">{{ opt.texto }}</option>
+                </select>
+              </div>
+              <button type="button" *ngIf="respuestas.p8" 
+                      class="soundwave-btn micro" 
+                      [class.playing]="audioActivoKey === 'respuesta_' + getAudioKeyQ8(respuestas.p8)" 
+                      (click)="reproducirAudioRespuesta(getAudioKeyQ8(respuestas.p8), $event)">
+                <img src="assets/icon/onda-sonora.png" alt="Audio" class="wave-icon" />
+              </button>
+            </div>
+          </section>
+
+        </div>
+      </div>
+
+      <!-- BOTÓN GUARDAR Y CONTINUAR -->
+      <div class="btn-container">
+        <button type="button" class="action-pill-btn" (click)="guardarYContinuar()">
+          Guardar y Continuar
+        </button>
+      </div>
+
+    </main>
+
+  </div>
+</ion-content>

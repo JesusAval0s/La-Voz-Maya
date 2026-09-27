@@ -1,0 +1,193 @@
+.main-screen-content {
+  --background: #6fe9a1; // Verde menta brillante cabecera
+
+  .screen-layout {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+  }
+
+  // --- CABECERA SUPERIOR ---
+  .header-section {
+    position: relative;
+    padding: 1.2rem 1.4rem 0.5rem 1.4rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    min-height: 285px;
+
+    .institutional-logos {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      .inst-logo {
+        height: 65px;
+        max-width: 110px;
+        object-fit: contain;
+
+        &.left {
+          transform: scale(1.05);
+        }
+
+        &.center {
+          transform: scale(1.05) translate(10px);
+        }
+
+        &.right {
+          transform: scale(1.05);
+        }
+      }
+    }
+
+    .main-identity {
+      margin-top: 5px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1;
+
+      .maya-logo {
+        width: 190px;
+        height: auto;
+        max-height: 140px;
+        object-fit: contain;
+      }
+    }
+
+    // Botón de nube posicionado en la esquina
+    .cloud-anchor {
+      position: absolute;
+      left: 1.2rem;
+      top: 195px;
+      z-index: 10;
+
+      .cloud-btn {
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        background: #ffffff;
+        border: 2px solid #111111;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        cursor: pointer;
+        padding: 0;
+
+        ion-icon {
+          font-size: 28px;
+          color: #1a1a1a;
+        }
+
+        .badge {
+          position: absolute;
+          top: -4px;
+          right: -4px;
+          background: #e02424;
+          color: #ffffff;
+          font-size: 11px;
+          font-weight: 800;
+          border-radius: 50%;
+          min-width: 20px;
+          height: 20px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: 2px solid #ffffff;
+        }
+
+        &.syncing {
+          animation: spin-pulse 1.4s infinite ease-in-out;
+        }
+      }
+    }
+  }
+
+  // --- PANEL INFERIOR CURVO ---
+  .content-sheet {
+    flex: 1;
+    background: #ddf4e2; // Verde claro pastel
+    border-top-left-radius: 46px;
+    border-top-right-radius: 46px;
+    margin-top: -30px;                         //para subir el rectangulo verde claro completo acercandolo al logo de la voz maya
+    padding: 3.5rem 1.8rem 2rem 1.8rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.04);
+    box-sizing: border-box;
+
+    .sheet-inner {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+    }
+
+    .sheet-title {
+      font-size: 1.28rem;
+      font-weight: 800;
+      color: #143522;
+      text-align: center;
+      line-height: 1.35;
+      margin: 0 0 2rem 0;
+      max-width: 310px;
+    }
+
+    .sheet-instruction {
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: #4a6344;
+      text-align: center;
+      line-height: 1.4;
+      margin: 0 0 3.5rem 0;
+      max-width: 250px;
+    }
+
+    .btn-container {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      background: transparent;
+
+      .survey-custom-pill {
+        background-color: #1e2f23;
+        color: #ffffff;
+        font-family: inherit;
+        font-weight: 700;
+        font-size: 1.05rem;
+        letter-spacing: 0.2px;
+        min-height: 52px;
+        min-width: 215px;
+        padding: 0 2rem;
+        border: none;
+        outline: none;
+        border-radius: 50px;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+        transition: transform 0.15s ease, background-color 0.15s ease;
+        -webkit-tap-highlight-color: transparent;
+
+        &:active {
+          transform: scale(0.97);
+          background-color: #121e16;
+        }
+      }
+    }
+  }
+}
+
+@keyframes spin-pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}

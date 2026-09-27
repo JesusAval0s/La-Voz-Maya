@@ -1,0 +1,336 @@
+.general-data-content {
+  --background: #6fe9a1;
+
+  .screen-layout {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    position: relative;
+    overflow-y: hidden;
+  }
+
+  // --- CABECERA SUPERIOR OPTIMIZADA ---
+  .header-section {
+    padding: 0.2rem 1.4rem 0 1.4rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    min-height: 110px;
+
+    .brand-row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: -5px;
+
+      .maya-logo-main {
+        height: 105px;
+        width: auto;
+        max-width: 190px;
+        object-fit: contain;
+        display: block;
+      }
+    }
+  }
+
+  // --- HOJA CURVA INFERIOR ---
+  .content-sheet {
+    flex: 1;
+    background: #ddf4e2;
+    border-top-left-radius: 42px;
+    border-top-right-radius: 42px;
+    padding: 1.1rem 1.1rem 1.6rem 1.1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.04);
+    box-sizing: border-box;
+    overflow: hidden;
+
+    .sheet-title {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #173822;
+      text-align: center;
+      margin: 0 0 0.5rem 0;
+      letter-spacing: -0.2px;
+    }
+
+    .title-divider {
+      width: 96%;
+      border: none;
+      height: 1px;
+      background-color: #bcdbc3;
+      margin: 0 0 0.7rem 0;
+    }
+
+    // TARJETA DE FORMULARIO BLANCA CON SCROLL INTERNO
+    .form-card-container {
+      width: 100%;
+      flex: 1;
+      min-height: 200px;
+      background: #ffffff;
+      border-radius: 14px;
+      padding: 0.9rem 0.5rem 0.9rem 0.9rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+      margin-bottom: 0.9rem;
+      display: flex;
+      box-sizing: border-box;
+
+      .scroll-body {
+        overflow-y: scroll;
+        padding-right: 0.7rem;
+        width: 100%;
+        -webkit-overflow-scrolling: touch;
+
+        &::-webkit-scrollbar {
+          width: 6px;
+        }
+        &::-webkit-scrollbar-track {
+          background: #f1f1f1;
+          border-radius: 8px;
+        }
+        &::-webkit-scrollbar-thumb {
+          background: #4a6344;
+          border-radius: 8px;
+        }
+      }
+    }
+
+    // BLOQUES DE CAMPOS
+    .input-block {
+      margin-bottom: 0.85rem;
+
+      &:last-child {
+        margin-bottom: 0.2rem;
+      }
+    }
+
+    .input-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.7rem;
+      margin-bottom: 0.85rem;
+
+      .input-block {
+        margin-bottom: 0;
+      }
+    }
+
+    // ETIQUETA Y BOTÓN DE AUDIO DE ONDA SONORA
+    .label-audio-row {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      margin-bottom: 0.35rem;
+
+      .field-label {
+        font-size: 0.78rem;
+        font-weight: 800;
+        color: #111111;
+        line-height: 1.2;
+
+        .required-asterisk {
+          color: #dc2626;
+          font-weight: 900;
+          margin-right: 2px;
+          font-size: 0.85rem;
+        }
+      }
+    }
+
+    // DISPOSICIÓN EN LÍNEA: SELECT + BOTÓN DE AUDIO DINÁMICO
+    .select-with-audio-inline {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      width: 100%;
+
+      .select-wrapper {
+        flex: 1;
+      }
+
+      .option-sound-btn {
+        width: 36px !important;
+        height: 36px !important;
+        min-width: 36px !important;
+        max-width: 36px !important;
+        min-height: 36px !important;
+        max-height: 36px !important;
+        border-color: #2d6a4f !important;
+        background-color: #f0fdf4 !important;
+
+        .wave-icon {
+          width: 18px !important;
+          height: 18px !important;
+        }
+      }
+    }
+
+    // INPUTS DE TEXTO Y NÚMEROS
+    .custom-input {
+      width: 100%;
+      height: 38px;
+      border: 1px solid #c7ccd0;
+      border-radius: 8px;
+      padding: 0 0.65rem;
+      font-size: 0.82rem;
+      color: #1a1a1a;
+      background: #ffffff;
+      outline: none;
+      box-sizing: border-box;
+      transition: border-color 0.2s ease, background-color 0.25s ease, box-shadow 0.2s ease;
+
+      &:focus {
+        border-color: #2d6a4f;
+        box-shadow: 0 0 0 2px rgba(45, 106, 79, 0.15);
+      }
+
+      &.has-error {
+        background-color: #fbb686 !important;
+        border-color: #d9532f !important;
+        color: #1a1a1a;
+
+        &::placeholder {
+          color: #78350f;
+        }
+      }
+
+      &:disabled {
+        background: #f3f4f6;
+        color: #9ca3af;
+        cursor: not-allowed;
+      }
+
+      &::placeholder {
+        color: #9ca3af;
+        font-size: 0.78rem;
+      }
+    }
+
+    // SELECTORES CON FLECHA DESPLEGABLE
+    .select-wrapper {
+      position: relative;
+      width: 100%;
+
+      .custom-select {
+        width: 100%;
+        height: 38px;
+        border: 1px solid #c7ccd0;
+        border-radius: 8px;
+        padding: 0 1.8rem 0 0.65rem;
+        font-size: 0.82rem;
+        color: #1a1a1a;
+        background: #ffffff;
+        outline: none;
+        box-sizing: border-box;
+        appearance: none;
+        -webkit-appearance: none;
+        cursor: pointer;
+        transition: border-color 0.2s ease, background-color 0.25s ease;
+
+        &:focus {
+          border-color: #2d6a4f;
+          box-shadow: 0 0 0 2px rgba(45, 106, 79, 0.15);
+        }
+      }
+
+      &.has-error .custom-select {
+        background-color: #fbb686 !important;
+        border-color: #d9532f !important;
+        color: #1a1a1a;
+      }
+
+      &::after {
+        content: '';
+        position: absolute;
+        right: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 0;
+        height: 0;
+        border-left: 5px solid transparent;
+        border-right: 5px solid transparent;
+        border-top: 5px solid #222222;
+        pointer-events: none;
+      }
+    }
+
+    // BOTÓN DE ACCIÓN TIPO PASTILLA
+    .btn-container {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+
+      .action-pill-btn {
+        background-color: #1e2f23;
+        color: #ffffff;
+        font-family: inherit;
+        font-weight: 700;
+        font-size: 1.05rem;
+        min-height: 48px;
+        min-width: 230px;
+        padding: 0 1.8rem;
+        border: none;
+        outline: none;
+        border-radius: 50px;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+        transition: transform 0.15s ease, background-color 0.15s ease;
+        -webkit-tap-highlight-color: transparent;
+
+        &:active {
+          transform: scale(0.97);
+          background-color: #121e16;
+        }
+      }
+    }
+  }
+}
+
+.soundwave-btn {
+  background: #ffffff !important;
+  border: 1.5px solid #2d6a4f !important;
+  border-radius: 50% !important;
+  width: 28px !important;
+  height: 28px !important;
+  min-width: 28px !important;
+  max-width: 28px !important;
+  min-height: 28px !important;
+  max-height: 28px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  padding: 0 !important;
+  flex-shrink: 0 !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+
+  .wave-icon {
+    width: 16px !important;
+    height: 16px !important;
+    max-width: 16px !important;
+    max-height: 16px !important;
+    object-fit: contain !important;
+    display: block !important;
+  }
+
+  &:active {
+    transform: scale(0.92);
+  }
+
+  &.playing {
+    background: #b7e4c7 !important;
+    animation: wave-pulse 1.2s infinite ease-in-out !important;
+  }
+}
+
+@keyframes wave-pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}

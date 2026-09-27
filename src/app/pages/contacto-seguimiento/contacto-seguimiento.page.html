@@ -1,0 +1,97 @@
+<ion-content [fullscreen]="true" class="info-screen-content">
+  <div class="screen-layout">
+
+    <!-- CABECERA INSTITUCIONAL EN 2 NIVELES -->
+    <header class="header-section">
+      <div class="institutional-row">
+        <img src="assets/icon/logo-centrogeo-1.png" alt="CentroGeo" class="inst-logo left" />
+        <img src="assets/icon/logo-centrogeo-2.png" alt="GeoInt" class="inst-logo right" />
+      </div>
+
+      <div class="brand-row">
+        <img src="assets/icon/logo-voz-maya.png" alt="La Voz Maya" class="maya-logo-main" />
+      </div>
+    </header>
+
+    <!-- HOJA CURVA INFERIOR -->
+    <main class="content-sheet">
+
+      <!-- VISTA FORMULARIO -->
+      <ng-container *ngIf="!encuestaCompletada">
+        <h1 class="sheet-title">Formulario de contacto</h1>
+        <hr class="title-divider" />
+
+        <div class="questions-card-container">
+          <div class="scroll-body">
+
+            <!-- RECUADRO DE TEXTO INFORMATIVO -->
+            <div class="instructions-banner">
+              <p class="instructions-text">
+                Si desea ser contactado para ofrecerle ayuda de seguimiento por temas de salud mental o acoso laboral, por favor comparta los siguientes datos:
+              </p>
+            </div>
+
+            <!-- CAMPO: NOMBRE -->
+            <div class="form-group" [class.has-error-block]="esInvalido('nombre')">
+              <label class="field-label">Nombre:</label>
+              <input
+                type="text"
+                class="custom-input"
+                placeholder="Ingresa tu nombre completo"
+                [(ngModel)]="contacto.nombre"
+              />
+            </div>
+
+            <!-- CAMPO: NÚMERO DE TELÉFONO -->
+            <div class="form-group" [class.has-error-block]="esInvalido('telefono')">
+              <label class="field-label">Número de Teléfono:</label>
+              <input
+                type="tel"
+                class="custom-input"
+                placeholder="10 dígitos"
+                [(ngModel)]="contacto.telefono"
+              />
+            </div>
+
+            <!-- CAMPO: CORREO ELECTRÓNICO -->
+            <div class="form-group" [class.has-error-block]="esInvalido('correo')">
+              <label class="field-label">Correo Electrónico:</label>
+              <input
+                type="email"
+                class="custom-input"
+                placeholder="correo@ejemplo.com"
+                [(ngModel)]="contacto.correo"
+              />
+            </div>
+
+          </div>
+        </div>
+
+        <!-- BOTÓN FINALIZAR ENCUESTA -->
+        <div class="btn-container">
+          <button type="button" class="action-pill-btn" (click)="finalizarEncuesta()">
+            Finalizar encuesta
+          </button>
+        </div>
+      </ng-container>
+
+      <!-- VISTA AGRADECIMIENTO FINAL -->
+      <ng-container *ngIf="encuestaCompletada">
+        <div class="thanks-wrapper">
+          <div class="check-circle">✓</div>
+          <h2 class="thanks-title">¡Encuesta completada!</h2>
+          <p class="thanks-message">
+            Sus datos de contacto han sido registrados correctamente. La información será resguardada bajo estricta confidencialidad por el equipo del proyecto.
+          </p>
+          <div class="btn-container">
+            <button type="button" class="action-pill-btn" (click)="irAVentanaPrincipal()">
+              Volver al inicio
+            </button>
+          </div>
+        </div>
+      </ng-container>
+
+    </main>
+
+  </div>
+</ion-content>

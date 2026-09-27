@@ -1,0 +1,7 @@
+{
+  "name": "la-voz-maya",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}

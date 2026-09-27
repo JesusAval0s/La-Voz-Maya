@@ -1,0 +1,81 @@
+<ion-content [fullscreen]="true" class="info-screen-content">
+  <div class="screen-layout">
+
+    <!-- CABECERA INSTITUCIONAL EN 2 NIVELES -->
+    <header class="header-section">
+      <div class="institutional-row">
+        <img src="assets/icon/logo-centrogeo-1.png" alt="CentroGeo" class="inst-logo left" />
+        <img src="assets/icon/logo-centrogeo-2.png" alt="GeoInt" class="inst-logo right" />
+      </div>
+
+      <div class="brand-row">
+        <img src="assets/icon/logo-voz-maya.png" alt="La Voz Maya" class="maya-logo-main" />
+      </div>
+    </header>
+
+    <!-- HOJA CURVA INFERIOR -->
+    <main class="content-sheet">
+      <h1 class="sheet-title">Trastorno de Ansiedad Generalizada (GAD-7)</h1>
+      <hr class="title-divider" />
+
+      <!-- TARJETA CON SCROLL INTERNO -->
+      <div class="questions-card-container">
+        <div class="scroll-body">
+
+          <!-- RECUADRO DE INSTRUCCIONES -->
+          <div class="instructions-banner">
+            <p class="instructions-text">
+              <strong>Instrucciones:</strong> En los últimos 14 días, ¿con qué frecuencia le han supuesto una molestia los siguientes problemas?
+            </p>
+          </div>
+
+          <!-- LISTADO DE PREGUNTAS DEL GAD-7 -->
+          <section *ngFor="let p of listaPreguntas" 
+                   class="question-block" 
+                   [class.has-error-block]="esInvalida(p.id)">
+            <div class="label-audio-row">
+              <span class="field-label">
+                <span class="required-asterisk">*</span> {{ p.num }}.- {{ p.texto }}
+              </span>
+              <button type="button" 
+                      class="soundwave-btn" 
+                      [class.playing]="audioActivoKey === 'pregunta_' + p.num" 
+                      (click)="reproducirAudioPregunta(p.num)"
+                      [title]="'Escuchar Pregunta ' + p.num">
+                <img src="assets/icon/onda-sonora.png" alt="Audio" class="wave-icon" />
+              </button>
+            </div>
+
+            <div class="options-vertical">
+              <div *ngFor="let opt of opcionesRespuesta" 
+                   class="option-audio-line" 
+                   (click)="respuestas[p.id] = opt.texto">
+                <div class="radio-option">
+                  <span class="custom-radio" [class.checked]="respuestas[p.id] === opt.texto"></span>
+                  <span class="option-label">{{ opt.texto }}</span>
+                </div>
+                <button type="button" 
+                        class="soundwave-btn micro" 
+                        [class.playing]="audioActivoKey === 'respuesta_' + opt.audioKey" 
+                        (click)="reproducirAudioRespuesta(opt.audioKey, $event)"
+                        [title]="'Escuchar ' + opt.texto">
+                  <img src="assets/icon/onda-sonora.png" alt="Audio" class="wave-icon" />
+                </button>
+              </div>
+            </div>
+          </section>
+
+        </div>
+      </div>
+
+      <!-- BOTÓN GUARDAR Y CONTINUAR -->
+      <div class="btn-container">
+        <button type="button" class="action-pill-btn" (click)="guardarYContinuar()">
+          Guardar y Continuar
+        </button>
+      </div>
+
+    </main>
+
+  </div>
+</ion-content>

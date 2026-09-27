@@ -1,0 +1,246 @@
+.info-screen-content {
+  --background: #6fe9a1;
+
+  .screen-layout {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    position: relative;
+    overflow-y: hidden;
+  }
+
+  .header-section {
+    padding: 0.6rem 1.4rem 0 1.4rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    .institutional-row {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      .inst-logo {
+        height: 52px;
+        max-width: 95px;
+        object-fit: contain;
+
+        &.left {
+          transform: scale(1.25);
+        }
+
+        &.right {
+          transform: scale(1.35);
+          transform-origin: center right;
+        }
+      }
+    }
+
+    .brand-row {
+      margin-top: -22px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      .maya-logo-main {
+        height: 100px;
+        width: auto;
+        max-width: 175px;
+        object-fit: contain;
+        display: block;
+      }
+    }
+  }
+
+  .content-sheet {
+    flex: 1;
+    background: #ddf4e2;
+    border-top-left-radius: 42px;
+    border-top-right-radius: 42px;
+    padding: 1.1rem 1.1rem 1.6rem 1.1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.04);
+    box-sizing: border-box;
+    overflow: hidden;
+
+    .sheet-title {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: #173822;
+      text-align: center;
+      margin: 0 0 0.5rem 0;
+      letter-spacing: -0.2px;
+    }
+
+    .title-divider {
+      width: 96%;
+      border: none;
+      height: 1px;
+      background-color: #bcdbc3;
+      margin: 0 0 0.7rem 0;
+    }
+
+    .questions-card-container {
+      width: 100%;
+      flex: 1;
+      min-height: 200px;
+      background: #ffffff;
+      border-radius: 14px;
+      padding: 0.9rem 0.5rem 0.9rem 0.9rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+      margin-bottom: 0.9rem;
+      display: flex;
+      box-sizing: border-box;
+
+      .scroll-body {
+        overflow-y: scroll;
+        padding-right: 0.7rem;
+        width: 100%;
+        -webkit-overflow-scrolling: touch;
+
+        &::-webkit-scrollbar {
+          width: 6px;
+        }
+        &::-webkit-scrollbar-track {
+          background: #f1f1f1;
+          border-radius: 8px;
+        }
+        &::-webkit-scrollbar-thumb {
+          background: #4a6344;
+          border-radius: 8px;
+        }
+      }
+    }
+
+    .instructions-banner {
+      background-color: #ddf4e2;
+      border-left: 4px solid #2d6a4f;
+      border-radius: 8px;
+      padding: 0.65rem 0.8rem;
+      margin-bottom: 1.1rem;
+
+      .instructions-text {
+        font-size: 0.82rem;
+        color: #173822;
+        line-height: 1.4;
+        margin: 0;
+      }
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+      padding: 0.35rem;
+      border-radius: 8px;
+      transition: background-color 0.2s ease;
+
+      &.has-error-block {
+        background-color: #fbb686;
+
+        .custom-input {
+          border-color: #d9532f;
+        }
+      }
+
+      .field-label {
+        font-size: 0.82rem;
+        font-weight: 800;
+        color: #111111;
+        display: block;
+        margin-bottom: 0.4rem;
+
+        .required-asterisk {
+          color: #dc2626;
+        }
+      }
+
+      .custom-input {
+        width: 100%;
+        height: 42px;
+        border: 1px solid #c7ccd0;
+        border-radius: 8px;
+        padding: 0 0.8rem;
+        font-size: 0.85rem;
+        color: #111111;
+        background: #ffffff;
+        outline: none;
+        box-sizing: border-box;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+        &:focus {
+          border-color: #2d6a4f;
+          box-shadow: 0 0 0 2px rgba(45, 106, 79, 0.15);
+        }
+      }
+    }
+
+    .thanks-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      text-align: center;
+      padding: 1.5rem;
+
+      .check-circle {
+        width: 65px;
+        height: 65px;
+        border-radius: 50%;
+        background-color: #2d6a4f;
+        color: #ffffff;
+        font-size: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+      }
+
+      .thanks-title {
+        font-size: 1.45rem;
+        font-weight: 800;
+        color: #173822;
+        margin: 0 0 0.6rem 0;
+      }
+
+      .thanks-message {
+        font-size: 0.9rem;
+        color: #2e4d38;
+        line-height: 1.45;
+        max-width: 320px;
+        margin-bottom: 1.6rem;
+      }
+    }
+
+    .btn-container {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+
+      .action-pill-btn {
+        background-color: #1e2f23;
+        color: #ffffff;
+        font-weight: 700;
+        font-size: 1.05rem;
+        min-height: 48px;
+        min-width: 230px;
+        padding: 0 1.8rem;
+        border: none;
+        outline: none;
+        border-radius: 50px;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+        transition: transform 0.15s ease, background-color 0.15s ease;
+
+        &:active {
+          transform: scale(0.97);
+          background-color: #121e16;
+        }
+      }
+    }
+  }
+}

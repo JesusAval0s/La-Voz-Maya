@@ -1,0 +1,260 @@
+<ion-content [fullscreen]="true" class="info-screen-content">
+  <div class="screen-layout">
+
+    <!-- CABECERA INSTITUCIONAL EN 2 NIVELES -->
+    <header class="header-section">
+      <div class="institutional-row">
+        <img src="assets/icon/logo-centrogeo-1.png" alt="CentroGeo" class="inst-logo left" />
+        <img src="assets/icon/logo-centrogeo-2.png" alt="GeoInt" class="inst-logo right" />
+      </div>
+
+      <div class="brand-row">
+        <img src="assets/icon/logo-voz-maya.png" alt="La Voz Maya" class="maya-logo-main" />
+      </div>
+    </header>
+
+    <!-- HOJA CURVA INFERIOR -->
+    <main class="content-sheet">
+      <h1 class="sheet-title">Detección de Riesgo Suicida (ASQ)</h1>
+      <hr class="title-divider" />
+
+      <!-- TARJETA CON SCROLL INTERNO -->
+      <div class="questions-card-container">
+        <div class="scroll-body">
+
+          <!-- RECUADRO DE INSTRUCCIONES -->
+          <div class="instructions-banner">
+            <p class="instructions-text">
+              <strong>Instrucciones:</strong> Por favor responda con sinceridad las siguientes preguntas. Toda la información es confidencial.
+            </p>
+          </div>
+
+          <!-- PREGUNTA 1 -->
+          <section class="question-block" [class.has-error-block]="esInvalida('p1')">
+            <div class="label-audio-row">
+              <span class="field-label">
+                <span class="required-asterisk">*</span> 1.- En las últimas semanas ¿Ha deseado estar muerto(a)?
+              </span>
+              <button type="button" 
+                      class="soundwave-btn" 
+                      [class.playing]="audioActivoKey === 'pregunta_1'" 
+                      (click)="reproducirAudioPregunta(1)">
+                <img src="assets/icon/onda-sonora.png" alt="Audio" class="wave-icon" />
+              </button>
+            </div>
+            <div class="options-vertical">
+              <div *ngFor="let opt of opcionesSiNo" 
+                   class="option-audio-line" 
+                   (click)="respuestas.p1_deseado_muerto = opt.texto">
+                <div class="radio-option">
+                  <span class="custom-radio" [class.checked]="respuestas.p1_deseado_muerto === opt.texto"></span>
+                  <span class="option-label">{{ opt.texto }}</span>
+                </div>
+                <button type="button" 
+                        class="soundwave-btn micro" 
+                        [class.playing]="audioActivoKey === 'respuesta_' + opt.audioKey" 
+                        (click)="reproducirAudioRespuesta(opt.audioKey, $event)">
+                  <img src="assets/icon/onda-sonora.png" alt="Audio" class="wave-icon" />
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <!-- PREGUNTA 2 -->
+          <section class="question-block" [class.has-error-block]="esInvalida('p2')">
+            <div class="label-audio-row">
+              <span class="field-label">
+                <span class="required-asterisk">*</span> 2.- En las últimas semanas ¿Ha sentido que usted o su familia estarían mejor si estuviera muerto?
+              </span>
+              <button type="button" 
+                      class="soundwave-btn" 
+                      [class.playing]="audioActivoKey === 'pregunta_2'" 
+                      (click)="reproducirAudioPregunta(2)">
+                <img src="assets/icon/onda-sonora.png" alt="Audio" class="wave-icon" />
+              </button>
+            </div>
+            <div class="options-vertical">
+              <div *ngFor="let opt of opcionesSiNo" 
+                   class="option-audio-line" 
+                   (click)="respuestas.p2_familia_mejor_muerto = opt.texto">
+                <div class="radio-option">
+                  <span class="custom-radio" [class.checked]="respuestas.p2_familia_mejor_muerto === opt.texto"></span>
+                  <span class="option-label">{{ opt.texto }}</span>
+                </div>
+                <button type="button" 
+                        class="soundwave-btn micro" 
+                        [class.playing]="audioActivoKey === 'respuesta_' + opt.audioKey" 
+                        (click)="reproducirAudioRespuesta(opt.audioKey, $event)">
+                  <img src="assets/icon/onda-sonora.png" alt="Audio" class="wave-icon" />
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <!-- PREGUNTA 3 -->
+          <section class="question-block" [class.has-error-block]="esInvalida('p3')">
+            <div class="label-audio-row">
+              <span class="field-label">
+                <span class="required-asterisk">*</span> 3.- En la última semana ¿Ha pensado en suicidarse?
+              </span>
+              <button type="button" 
+                      class="soundwave-btn" 
+                      [class.playing]="audioActivoKey === 'pregunta_3'" 
+                      (click)="reproducirAudioPregunta(3)">
+                <img src="assets/icon/onda-sonora.png" alt="Audio" class="wave-icon" />
+              </button>
+            </div>
+            <div class="options-vertical">
+              <div *ngFor="let opt of opcionesSiNo" 
+                   class="option-audio-line" 
+                   (click)="respuestas.p3_pensado_suicidarse = opt.texto">
+                <div class="radio-option">
+                  <span class="custom-radio" [class.checked]="respuestas.p3_pensado_suicidarse === opt.texto"></span>
+                  <span class="option-label">{{ opt.texto }}</span>
+                </div>
+                <button type="button" 
+                        class="soundwave-btn micro" 
+                        [class.playing]="audioActivoKey === 'respuesta_' + opt.audioKey" 
+                        (click)="reproducirAudioRespuesta(opt.audioKey, $event)">
+                  <img src="assets/icon/onda-sonora.png" alt="Audio" class="wave-icon" />
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <!-- PREGUNTA 4 (CON SUBPREGUNTAS 4.1 Y 4.2) -->
+          <section class="question-block" [class.has-error-block]="esInvalida('p4')">
+            <div class="label-audio-row">
+              <span class="field-label">
+                <span class="required-asterisk">*</span> 4.- ¿Alguna vez ha intentado suicidarse?
+              </span>
+              <button type="button" 
+                      class="soundwave-btn" 
+                      [class.playing]="audioActivoKey === 'pregunta_4'" 
+                      (click)="reproducirAudioPregunta(4)">
+                <img src="assets/icon/onda-sonora.png" alt="Audio" class="wave-icon" />
+              </button>
+            </div>
+            <div class="options-vertical">
+              <div *ngFor="let opt of opcionesSiNo" 
+                   class="option-audio-line" 
+                   (click)="respuestas.p4_intentado_suicidarse = opt.texto">
+                <div class="radio-option">
+                  <span class="custom-radio" [class.checked]="respuestas.p4_intentado_suicidarse === opt.texto"></span>
+                  <span class="option-label">{{ opt.texto }}</span>
+                </div>
+                <button type="button" 
+                        class="soundwave-btn micro" 
+                        [class.playing]="audioActivoKey === 'respuesta_' + opt.audioKey" 
+                        (click)="reproducirAudioRespuesta(opt.audioKey, $event)">
+                  <img src="assets/icon/onda-sonora.png" alt="Audio" class="wave-icon" />
+                </button>
+              </div>
+            </div>
+
+            <!-- 4.1 CONDICIONAL -->
+            <div class="other-input-container" *ngIf="respuestas.p4_intentado_suicidarse === 'Sí'" [class.has-error-block]="esInvalida('p4_1')">
+              <div class="label-audio-row">
+                <p class="specify-title"><span class="required-asterisk">*</span> 4.1.- Si respondió sí ¿Cómo lo hizo?:</p>
+                <button type="button" class="soundwave-btn micro" [class.playing]="audioActivoKey === 'pregunta_4_1'" (click)="reproducirAudioPregunta('4_1')">
+                  <img src="assets/icon/onda-sonora.png" alt="Audio" class="wave-icon" />
+                </button>
+              </div>
+              <div class="input-mic-row">
+                <input type="text" class="custom-input" placeholder="Escribe tu respuesta..." [(ngModel)]="respuestas.p4_1_como_lo_hizo" />
+                <button *ngIf="!audiosGrabados['p4_1']" type="button" class="record-btn" [class.recording]="grabadorActivo === 'p4_1'" (click)="toggleGrabarAudio('p4_1')">
+                  <img src="assets/icon/microfono.png" alt="Grabar" class="mic-icon" />
+                </button>
+                <button *ngIf="audiosGrabados['p4_1']" type="button" class="playback-btn" (click)="escucharGrabacion('p4_1')">
+                  <img [src]="reproduciendoGrabacion === 'p4_1' ? 'assets/icon/pausa.png' : 'assets/icon/play.png'" alt="Reproducir" class="play-pause-icon" />
+                </button>
+                <button *ngIf="audiosGrabados['p4_1']" type="button" class="delete-audio-btn" (click)="eliminarAudio('p4_1')">✕</button>
+              </div>
+            </div>
+
+            <!-- 4.2 CONDICIONAL -->
+            <div class="other-input-container" *ngIf="respuestas.p4_intentado_suicidarse === 'Sí'" [class.has-error-block]="esInvalida('p4_2')">
+              <div class="label-audio-row">
+                <p class="specify-title"><span class="required-asterisk">*</span> 4.2.- ¿Cuándo ocurrió?:</p>
+                <button type="button" class="soundwave-btn micro" [class.playing]="audioActivoKey === 'pregunta_4_2'" (click)="reproducirAudioPregunta('4_2')">
+                  <img src="assets/icon/onda-sonora.png" alt="Audio" class="wave-icon" />
+                </button>
+              </div>
+              <div class="input-mic-row">
+                <input type="text" class="custom-input" placeholder="Escribe tu respuesta..." [(ngModel)]="respuestas.p4_2_cuando_ocurrio" />
+                <button *ngIf="!audiosGrabados['p4_2']" type="button" class="record-btn" [class.recording]="grabadorActivo === 'p4_2'" (click)="toggleGrabarAudio('p4_2')">
+                  <img src="assets/icon/microfono.png" alt="Grabar" class="mic-icon" />
+                </button>
+                <button *ngIf="audiosGrabados['p4_2']" type="button" class="playback-btn" (click)="escucharGrabacion('p4_2')">
+                  <img [src]="reproduciendoGrabacion === 'p4_2' ? 'assets/icon/pausa.png' : 'assets/icon/play.png'" alt="Reproducir" class="play-pause-icon" />
+                </button>
+                <button *ngIf="audiosGrabados['p4_2']" type="button" class="delete-audio-btn" (click)="eliminarAudio('p4_2')">✕</button>
+              </div>
+            </div>
+          </section>
+
+          <!-- PREGUNTA 5 (CON SUBPREGUNTA 5.1) -->
+          <section class="question-block" [class.has-error-block]="esInvalida('p5')">
+            <div class="label-audio-row">
+              <span class="field-label">
+                <span class="required-asterisk">*</span> 5.- ¿Está pensando suicidarse en este momento?
+              </span>
+              <button type="button" 
+                      class="soundwave-btn" 
+                      [class.playing]="audioActivoKey === 'pregunta_5'" 
+                      (click)="reproducirAudioPregunta(5)">
+                <img src="assets/icon/onda-sonora.png" alt="Audio" class="wave-icon" />
+              </button>
+            </div>
+            <div class="options-vertical">
+              <div *ngFor="let opt of opcionesSiNo" 
+                   class="option-audio-line" 
+                   (click)="respuestas.p5_pensando_suicidarse_ahora = opt.texto">
+                <div class="radio-option">
+                  <span class="custom-radio" [class.checked]="respuestas.p5_pensando_suicidarse_ahora === opt.texto"></span>
+                  <span class="option-label">{{ opt.texto }}</span>
+                </div>
+                <button type="button" 
+                        class="soundwave-btn micro" 
+                        [class.playing]="audioActivoKey === 'respuesta_' + opt.audioKey" 
+                        (click)="reproducirAudioRespuesta(opt.audioKey, $event)">
+                  <img src="assets/icon/onda-sonora.png" alt="Audio" class="wave-icon" />
+                </button>
+              </div>
+            </div>
+
+            <!-- 5.1 CONDICIONAL -->
+            <div class="other-input-container" *ngIf="respuestas.p5_pensando_suicidarse_ahora === 'Sí'" [class.has-error-block]="esInvalida('p5_1')">
+              <div class="label-audio-row">
+                <p class="specify-title"><span class="required-asterisk">*</span> 5.1.- Describa estos pensamientos (planes, intención, preparativos):</p>
+                <button type="button" class="soundwave-btn micro" [class.playing]="audioActivoKey === 'pregunta_5_1'" (click)="reproducirAudioPregunta('5_1')">
+                  <img src="assets/icon/onda-sonora.png" alt="Audio" class="wave-icon" />
+                </button>
+              </div>
+              <div class="input-mic-row">
+                <input type="text" class="custom-input" placeholder="Escribe tu respuesta..." [(ngModel)]="respuestas.p5_1_describa_pensamientos" />
+                <button *ngIf="!audiosGrabados['p5_1']" type="button" class="record-btn" [class.recording]="grabadorActivo === 'p5_1'" (click)="toggleGrabarAudio('p5_1')">
+                  <img src="assets/icon/microfono.png" alt="Grabar" class="mic-icon" />
+                </button>
+                <button *ngIf="audiosGrabados['p5_1']" type="button" class="playback-btn" (click)="escucharGrabacion('p5_1')">
+                  <img [src]="reproduciendoGrabacion === 'p5_1' ? 'assets/icon/pausa.png' : 'assets/icon/play.png'" alt="Reproducir" class="play-pause-icon" />
+                </button>
+                <button *ngIf="audiosGrabados['p5_1']" type="button" class="delete-audio-btn" (click)="eliminarAudio('p5_1')">✕</button>
+              </div>
+            </div>
+          </section>
+
+        </div>
+      </div>
+
+      <!-- BOTÓN FINALIZAR -->
+      <div class="btn-container">
+        <button type="button" class="action-pill-btn" (click)="guardarYContinuar()">
+          Guardar y Finalizar
+        </button>
+      </div>
+
+    </main>
+
+  </div>
+</ion-content>

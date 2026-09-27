@@ -1,0 +1,99 @@
+<ion-content [fullscreen]="true" class="consent-screen-content">
+  <div class="screen-layout">
+
+    <!-- CABECERA INSTITUCIONAL SIMPLIFICADA (SOLO LOGO LA VOZ MAYA) -->
+    <header class="header-section">
+      <div class="brand-row">
+        <img 
+          src="assets/icon/logo-voz-maya.png" 
+          alt="La Voz Maya" 
+          class="maya-logo-main"
+        />
+      </div>
+    </header>
+
+    <!-- HOJA CURVA INFERIOR -->
+    <main class="content-sheet">
+      <h1 class="sheet-title">Consentimiento Informado</h1>
+      
+      <hr class="title-divider" />
+
+      <!-- CUADRO DE ATENCIÓN CON BOTÓN DE AUDIO DE ONDA SONORA -->
+      <div class="attention-box">
+        <div class="attention-text">
+          <p><strong>Atención:</strong> Revisa y confirma el consentimiento para continuar.</p>
+        </div>
+        <button 
+          type="button" 
+          class="soundwave-btn" 
+          [class.playing]="reproduciendoAudio"
+          (click)="reproducirAudioConsentimiento()"
+          aria-label="Escuchar consentimiento"
+        >
+          <img 
+            src="assets/icon/onda-sonora.png" 
+            alt="Audio" 
+            class="wave-icon"
+          />
+        </button>
+      </div>
+
+      <!-- TEXTO OFICIAL CON SCROLL INTERNO -->
+      <div class="text-card-container">
+        <div class="scroll-body">
+          <h2 class="participant-heading">Estimado(a) participante:</h2>
+          
+          <p class="body-text">
+            CentroGeo realiza un estudio sobre el bienestar emocional en Yucatán para fortalecer la salud mental y prevenir riesgos.
+          </p>
+          
+          <p class="body-text">
+            Solicitamos tu valioso apoyo respondiendo esta encuesta según tus actividades y emociones diarias. Tu participación voluntaria es fundamental para este proyecto.
+          </p>
+
+          <p class="body-text">
+            Toda tu información será tratada con estricta confidencialidad y privacidad, con acceso exclusivo para profesionales de salud e investigación. Tus datos jamás se usarán para otros fines.
+          </p>
+
+          <p class="body-text">
+            Al finalizar, recibirás una recomendación personalizada a la que te invitamos a dar seguimiento. ¡Muchas gracias por tu tiempo y colaboración!
+          </p>
+        </div>
+      </div>
+
+      <!-- TARJETA DE DECISIÓN (SÍ / NO) CON ALERTA DE COLOR MELOCOTÓN -->
+      <div class="decision-card" [class.has-error]="tieneError && !respuestaSeleccionada">
+        <p class="decision-question">
+          ¿Deseas participar voluntariamente y firmar este consentimiento?
+        </p>
+
+        <div class="radio-group">
+          <!-- OPCIÓN SÍ -->
+          <div class="radio-option" (click)="seleccionar('SI')">
+            <span class="custom-radio" [class.checked]="respuestaSeleccionada === 'SI'"></span>
+            <span class="radio-label">SI, ACEPTO</span>
+          </div>
+
+          <!-- OPCIÓN NO -->
+          <div class="radio-option" (click)="seleccionar('NO')">
+            <span class="custom-radio" [class.checked]="respuestaSeleccionada === 'NO'"></span>
+            <span class="radio-label">NO, NO ACEPTO</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- BOTÓN VALIDAR RESPUESTA -->
+      <div class="btn-container">
+        <button 
+          type="button" 
+          class="action-pill-btn"
+          (click)="validarRespuesta()"
+        >
+          Validar respuesta
+        </button>
+      </div>
+
+    </main>
+
+  </div>
+</ion-content>

@@ -1,0 +1,269 @@
+<ion-content [fullscreen]="true" class="general-data-content">
+  <div class="screen-layout">
+
+    <!-- CABECERA INSTITUCIONAL SIMPLIFICADA (SOLO LOGO LA VOZ MAYA) -->
+    <header class="header-section">
+      <div class="brand-row">
+        <img 
+          src="assets/icon/logo-voz-maya.png" 
+          alt="La Voz Maya" 
+          class="maya-logo-main"
+        />
+      </div>
+    </header>
+
+    <!-- HOJA CURVA INFERIOR -->
+    <main class="content-sheet">
+      <h1 class="sheet-title">Datos Generales</h1>
+      
+      <hr class="title-divider" />
+
+      <!-- TARJETA DE FORMULARIO BLANCA CON SCROLL INTERNO -->
+      <div class="form-card-container">
+        <div class="scroll-body">
+
+          <!-- 1. NOMBRE COMPLETO -->
+          <div class="input-block">
+            <div class="label-audio-row">
+              <label class="field-label" [class.text-error]="campoInvalido('nombreCompleto')">
+                <span class="required-asterisk">*</span>Nombre completo:
+              </label>
+              <button type="button" class="soundwave-btn" (click)="reproducirAudioCampo('nombre_completo')">
+                <img src="assets/icon/onda-sonora.png" alt="Audio" class="wave-icon" />
+              </button>
+            </div>
+            <input 
+              type="text" 
+              class="custom-input" 
+              [class.has-error]="campoInvalido('nombreCompleto')"
+              [(ngModel)]="formulario.nombreCompleto"
+              placeholder="Ingresa tu nombre completo"
+            />
+          </div>
+
+          <!-- 2. TELÉFONOS (PERSONAL Y EMERGENCIA) -->
+          <div class="input-grid-2">
+            <div class="input-block">
+              <div class="label-audio-row">
+                <label class="field-label" [class.text-error]="campoInvalido('telefonoPersonal')">
+                  <span class="required-asterisk">*</span>Teléfono personal:
+                </label>
+              </div>
+              <input 
+                type="tel" 
+                class="custom-input" 
+                [class.has-error]="campoInvalido('telefonoPersonal')"
+                [(ngModel)]="formulario.telefonoPersonal"
+                (input)="validarSoloNumeros('telefonoPersonal', $event)"
+                maxlength="10"
+                placeholder="10 dígitos"
+              />
+            </div>
+
+            <div class="input-block">
+              <div class="label-audio-row">
+                <label class="field-label" [class.text-error]="campoInvalido('telefonoEmergencia')">
+                  <span class="required-asterisk">*</span>Tel. emergencia:
+                </label>
+              </div>
+              <input 
+                type="tel" 
+                class="custom-input" 
+                [class.has-error]="campoInvalido('telefonoEmergencia')"
+                [(ngModel)]="formulario.telefonoEmergencia"
+                (input)="validarSoloNumeros('telefonoEmergencia', $event)"
+                maxlength="10"
+                placeholder="10 dígitos"
+              />
+            </div>
+          </div>
+
+          <!-- 3. CORREO ELECTRÓNICO -->
+          <div class="input-block">
+            <div class="label-audio-row">
+              <label class="field-label" [class.text-error]="campoInvalido('correoElectronico')">
+                <span class="required-asterisk">*</span>Correo electrónico:
+              </label>
+              <button type="button" class="soundwave-btn" (click)="reproducirAudioCampo('correo_electronico')">
+                <img src="assets/icon/onda-sonora.png" alt="Audio" class="wave-icon" />
+              </button>
+            </div>
+            <input 
+              type="email" 
+              class="custom-input" 
+              [class.has-error]="campoInvalido('correoElectronico')"
+              [(ngModel)]="formulario.correoElectronico"
+              placeholder="correo@ejemplo.com"
+            />
+          </div>
+
+          <!-- 4. EDAD Y GÉNERO -->
+          <div class="input-grid-2">
+            <div class="input-block">
+              <div class="label-audio-row">
+                <label class="field-label" [class.text-error]="campoInvalido('edad')">
+                  <span class="required-asterisk">*</span>Edad:
+                </label>
+              </div>
+              <input 
+                type="number" 
+                class="custom-input" 
+                [class.has-error]="campoInvalido('edad')"
+                [(ngModel)]="formulario.edad"
+                (input)="validarSoloNumeros('edad', $event)"
+                maxlength="3"
+                placeholder="Ej. 35"
+              />
+            </div>
+
+            <div class="input-block">
+              <div class="label-audio-row">
+                <label class="field-label" [class.text-error]="campoInvalido('genero')">
+                  <span class="required-asterisk">*</span>Género:
+                </label>
+              </div>
+              <div class="select-wrapper" [class.has-error]="campoInvalido('genero')">
+                <select class="custom-select" [(ngModel)]="formulario.genero">
+                  <option value="" disabled selected>Selecciona</option>
+                  <option value="Masculino">Masculino</option>
+                  <option value="Femenino">Femenino</option>
+                  <option value="Otro">Otro</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- 5. ESTADO CIVIL (CON AUDIO DINÁMICO DE RESPUESTA) -->
+          <div class="input-block">
+            <div class="label-audio-row">
+              <label class="field-label" [class.text-error]="campoInvalido('estadoCivil')">
+                <span class="required-asterisk">*</span>Estado civil:
+              </label>
+              <button type="button" class="soundwave-btn" (click)="reproducirAudioCampo('estado_civil')">
+                <img src="assets/icon/onda-sonora.png" alt="Audio" class="wave-icon" />
+              </button>
+            </div>
+            <div class="select-with-audio-inline">
+              <div class="select-wrapper" [class.has-error]="campoInvalido('estadoCivil')">
+                <select class="custom-select" [(ngModel)]="formulario.estadoCivil">
+                  <option value="" disabled selected>Selecciona estado civil</option>
+                  <option value="Solter@">Solter@</option>
+                  <option value="Casad@">Casad@</option>
+                  <option value="Unión libre">Unión libre</option>
+                </select>
+              </div>
+              <button 
+                type="button" 
+                class="soundwave-btn option-sound-btn" 
+                *ngIf="formulario.estadoCivil" 
+                (click)="reproducirAudioRespuestaSeleccionada()"
+              >
+                <img src="assets/icon/onda-sonora.png" alt="Audio" class="wave-icon" />
+              </button>
+            </div>
+          </div>
+
+          <!-- 6. ¿TIENE HIJOS? Y ¿CUÁNTOS? -->
+          <div class="input-grid-2">
+            <div class="input-block">
+              <div class="label-audio-row">
+                <label class="field-label"><span class="required-asterisk">*</span>¿Tiene hijos?</label>
+              </div>
+              <div class="select-wrapper">
+                <select class="custom-select" [(ngModel)]="formulario.tieneHijos" (change)="onTieneHijosChange()">
+                  <option value="Sí">Sí</option>
+                  <option value="No">No</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="input-block">
+              <div class="label-audio-row">
+                <label class="field-label">¿Cuántos?</label>
+              </div>
+              <input 
+                type="number" 
+                class="custom-input" 
+                [(ngModel)]="formulario.cuantosHijos"
+                (input)="validarSoloNumeros('cuantosHijos', $event)"
+                [disabled]="formulario.tieneHijos === 'No'"
+                placeholder="Ej. 2"
+              />
+            </div>
+          </div>
+
+          <!-- 7. MUNICIPIO (CON SELECTOR DE YUCATÁN) -->
+          <div class="input-block">
+            <div class="label-audio-row">
+              <label class="field-label" [class.text-error]="campoInvalido('municipio')">
+                <span class="required-asterisk">*</span>Municipio (Yucatán):
+              </label>
+              <button type="button" class="soundwave-btn" (click)="reproducirAudioCampo('municipio')">
+                <img src="assets/icon/onda-sonora.png" alt="Audio" class="wave-icon" />
+              </button>
+            </div>
+            <div class="select-wrapper" [class.has-error]="campoInvalido('municipio')">
+              <select class="custom-select" [(ngModel)]="formulario.municipio">
+                <option value="" disabled selected>Selecciona tu municipio</option>
+                <option *ngFor="let mun of municipiosYucatan" [value]="mun">{{ mun }}</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- 8. DIRECCIÓN COMPLETA -->
+          <div class="input-block">
+            <div class="label-audio-row">
+              <label class="field-label" [class.text-error]="campoInvalido('direccionCompleta')">
+                <span class="required-asterisk">*</span>Dirección completa:
+              </label>
+              <button type="button" class="soundwave-btn" (click)="reproducirAudioCampo('direccion')">
+                <img src="assets/icon/onda-sonora.png" alt="Audio" class="wave-icon" />
+              </button>
+            </div>
+            <input 
+              type="text" 
+              class="custom-input" 
+              [class.has-error]="campoInvalido('direccionCompleta')"
+              [(ngModel)]="formulario.direccionCompleta"
+              placeholder="Calle, número, colonia..."
+            />
+          </div>
+
+          <!-- 9. TIEMPO DE VIVIR EN YUCATÁN -->
+          <div class="input-block">
+            <div class="label-audio-row">
+              <label class="field-label" [class.text-error]="campoInvalido('tiempoVivirYucatan')">
+                <span class="required-asterisk">*</span>Años viviendo en Yucatán:
+              </label>
+              <button type="button" class="soundwave-btn" (click)="reproducirAudioCampo('tiempo_yucatan')">
+                <img src="assets/icon/onda-sonora.png" alt="Audio" class="wave-icon" />
+              </button>
+            </div>
+            <input 
+              type="number" 
+              class="custom-input" 
+              [class.has-error]="campoInvalido('tiempoVivirYucatan')"
+              [(ngModel)]="formulario.tiempoVivirYucatan"
+              (input)="validarSoloNumeros('tiempoVivirYucatan', $event)"
+              placeholder="Ej. 10"
+            />
+          </div>
+
+        </div>
+      </div>
+
+      <!-- BOTÓN DE ACCIÓN PARA VALIDAR Y CONTINUAR -->
+      <div class="btn-container">
+        <button 
+          type="button" 
+          class="action-pill-btn"
+          (click)="validarFormulario()"
+        >
+          Siguiente sección
+        </button>
+      </div>
+
+    </main>
+
+  </div>
+</ion-content>
