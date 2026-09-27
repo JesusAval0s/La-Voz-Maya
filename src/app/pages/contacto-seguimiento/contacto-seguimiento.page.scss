@@ -11,11 +11,12 @@
   }
 
   .header-section {
-    padding: 0.6rem 1.4rem 0 1.4rem;
+    padding: 0.8rem 1.4rem 0 1.4rem;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    min-height: 110px;
 
     .institutional-row {
       width: 100%;
