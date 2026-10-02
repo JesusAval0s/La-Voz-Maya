@@ -1,86 +1,170 @@
 import { Injectable } from '@angular/core';
-import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
+import { Capacitor } from '@capacitor/core';
+import { CapacitorSQLite, SQLiteConnection, SQLiteDBConnection } from '@capacitor-community/sqlite';
+import { Filesystem, Directory } from '@capacitor/filesystem';
 
 export interface CuestionarioRegistro {
-  id: string; // Folio de 8 dígitos único
-  fecha: string;
-  nombreEncuestado: string;
-  datosCompletos: any;
-  estadoSincronizacion: 'sincronizado' | 'local' | 'subiendo' | 'error';
+  id: number | string;
+  folio: string;
+  nombreEncuestado?: string;
+  fecha?: string;
+  estadoSincronizacion: 'local' | 'subiendo' | 'sincronizado' | 'error';
+  [key: string]: any;
 }
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class StorageService {
-  private STORAGE_KEY = 'la_voz_maya_registros_memoria';
+  private sqlite: SQLiteConnection = new SQLiteConnection(CapacitorSQLite);
+  private db: SQLiteDBConnection | null = null;
+  private isWeb: boolean = false;
 
   constructor() {}
 
-  // Guarda el cuestionario como un archivo físico individual en la carpeta del dispositivo
-  public async guardarCuestionarioEnCarpetaDownloads(
-    datosEvaluacion: any,
-    nombrePersona: string
-  ): Promise<string> {
-    const timestamp = Date.now();
-    const idUnico = timestamp.toString().slice(-8);
-    const fechaActual = new Date().toLocaleDateString('es-MX');
-
-    const objetoGuardar: CuestionarioRegistro = {
-      id: idUnico,
-      fecha: fechaActual,
-      nombreEncuestado: nombrePersona || 'Anónimo',
-      datosCompletos: datosEvaluacion,
-      estadoSincronizacion: 'local',
-    };
-
-    const nombreArchivo = `cuestionario_${idUnico}.json`;
-
+  async inicializarBaseDatos() {
     try {
-      // Intenta guardar en la carpeta "La Voz Maya" dentro de Documentos/Downloads del dispositivo
-      await Filesystem.writeFile({
-        path: `La Voz Maya/${nombreArchivo}`,
-        data: JSON.stringify(objetoGuardar, null, 2),
-        directory: Directory.Documents,
-        encoding: Encoding.UTF8,
-        recursive: true,
-      });
-      console.log(`Archivo físico guardado con éxito: La Voz Maya/${nombreArchivo}`);
+      const platform = Capacitor.getPlatform();
+      this.isWeb = platform === 'web';
+
+      if (this.isWeb) {
+        await this.sqlite.initWebStore();
+      }
+
+      this.db = await this.sqlite.createConnection(
+        'la_voz_maya_db',
+        false,
+        'no-encryption',
+        1,
+        false
+      );
+
+      await this.db.open();
+      await this.crearTablas();
+      await this.crearCarpetasLocales();
+
+      console.log('Base de datos y sistema de archivos inicializados correctamente.');
     } catch (error) {
-      console.warn('Aviso: El almacenamiento en archivos físicos requiere ejecución nativa (Android/iOS). Usando respaldo local en memoria.');
+      console.error('Error al inicializar el almacenamiento local:', error);
     }
-
-    // Guarda una copia en el listado de memoria para que la interfaz la muestre de inmediato
-    const lista = await this.obtenerCuestionariosLocales();
-    lista.unshift(objetoGuardar);
-    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(lista));
-
-    return idUnico;
   }
 
-  // Obtiene los cuestionarios locales para la vista de la nube
-  public async obtenerCuestionariosLocales(): Promise<CuestionarioRegistro[]> {
-    const data = localStorage.getItem(this.STORAGE_KEY);
-    if (data) {
-      return JSON.parse(data);
+  private async crearTablas() {
+    if (!this.db) return;
+
+    const sqlTablas = `
+      CREATE TABLE IF NOT EXISTS encuestas (
+        id TEXT PRIMARY KEY,
+        folio TEXT,
+        nombre_encuestado TEXT,
+        fecha_creacion TEXT,
+        sincronizado INTEGER DEFAULT 0
+      );
+
+      CREATE TABLE IF NOT EXISTS respuestas_cuestionarios (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        encuesta_id TEXT,
+        cuestionario_nombre TEXT,
+        datos_json TEXT,
+        estado_sincronizacion TEXT DEFAULT 'local',
+        fecha TEXT,
+        FOREIGN KEY(encuesta_id) REFERENCES encuestas(id)
+      );
+
+      CREATE TABLE IF NOT EXISTS audios_respuestas (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        encuesta_id TEXT,
+        cuestionario_nombre TEXT,
+        pregunta_key TEXT,
+        ruta_local TEXT,
+        url_supabase TEXT,
+        FOREIGN KEY(encuesta_id) REFERENCES encuestas(id)
+      );
+    `;
+
+    await this.db.execute(sqlTablas);
+  }
+
+  private async crearCarpetasLocales() {
+    try {
+      await Filesystem.mkdir({
+        path: 'la_voz_maya_audios',
+        directory: Directory.Data,
+        recursive: true
+      });
+    } catch (e) {
+      // Carpeta ya existente
     }
+  }
+
+  async guardarAudioLocal(folio: string, preguntaKey: string, audioBlob: Blob): Promise<string> {
+    try {
+      const base64Data = await this.blobToBase64(audioBlob);
+      const fileName = `la_voz_maya_audios/${folio}_${preguntaKey}_${Date.now()}.wav`;
+
+      await Filesystem.writeFile({
+        path: fileName,
+        data: base64Data,
+        directory: Directory.Data
+      });
+
+      return fileName;
+    } catch (error) {
+      console.error('Error al guardar el audio localmente:', error);
+      throw error;
+    }
+  }
+
+  private blobToBase64(blob: Blob): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        const base64Data = base64String.split(',')[1];
+        resolve(base64Data);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  }
+
+  async guardarRespuestasCuestionario(encuestaId: string, cuestionarioNombre: string, respuestas: any) {
+    if (!this.db) return;
+
+    const datosJson = JSON.stringify(respuestas);
+    const fechaActual = new Date().toISOString();
+    const sql = `INSERT INTO respuestas_cuestionarios (encuesta_id, cuestionario_nombre, datos_json, estado_sincronizacion, fecha) VALUES (?, ?, ?, 'local', ?);`;
     
-    // Registros iniciales de prueba si la lista está vacía
-    return [
-      { id: '00000001', fecha: '16/09/2026', nombreEncuestado: 'Jesus Alfredo Avalos Manzo', datosCompletos: {}, estadoSincronizacion: 'sincronizado' },
-      { id: '00000002', fecha: '16/09/2026', nombreEncuestado: 'Jesus Alfredo Avalos Manzo', datosCompletos: {}, estadoSincronizacion: 'local' },
-      { id: '00000003', fecha: '16/09/2026', nombreEncuestado: 'Jesus Alfredo Avalos Manzo', datosCompletos: {}, estadoSincronizacion: 'subiendo' },
-      { id: '00000004', fecha: '16/09/2026', nombreEncuestado: 'Jesus Alfredo Avalos Manzo', datosCompletos: {}, estadoSincronizacion: 'error' },
-    ];
+    await this.db.run(sql, [encuestaId, cuestionarioNombre, datosJson, fechaActual]);
   }
 
-  // Actualiza el estado de sincronización de un registro específico
-  public async actualizarEstado(id: string, nuevoEstado: CuestionarioRegistro['estadoSincronizacion']): Promise<void> {
-    const lista = await this.obtenerCuestionariosLocales();
-    const index = lista.findIndex(item => item.id === id);
-    if (index !== -1) {
-      lista[index].estadoSincronizacion = nuevoEstado;
-      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(lista));
+  async obtenerCuestionariosLocales(): Promise<CuestionarioRegistro[]> {
+    if (!this.db) return [];
+    try {
+      const res = await this.db.query('SELECT * FROM respuestas_cuestionarios;');
+      if (res && res.values) {
+        return res.values.map((row: any) => ({
+          id: row.id,
+          folio: row.encuesta_id || 'S/F',
+          fecha: row.fecha || new Date().toISOString(),
+          estadoSincronizacion: row.estado_sincronizacion || 'local',
+          datos: JSON.parse(row.datos_json || '{}')
+        }));
+      }
+      return [];
+    } catch (e) {
+      console.error('Error al obtener cuestionarios locales:', e);
+      return [];
+    }
+  }
+
+  async actualizarEstado(id: number | string, estado: 'local' | 'subiendo' | 'sincronizado' | 'error'): Promise<void> {
+    if (!this.db) return;
+    try {
+      const sql = `UPDATE respuestas_cuestionarios SET estado_sincronizacion = ? WHERE id = ?;`;
+      await this.db.run(sql, [estado, id]);
+    } catch (e) {
+      console.error('Error al actualizar estado de sincronización:', e);
     }
   }
 }

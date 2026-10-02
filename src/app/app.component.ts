@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
-import { IonApp, IonRouterOutlet } from '@ionic/angular';
+import { IonApp, IonRouterOutlet, Platform } from '@ionic/angular';
+import { StorageService } from './core/services/storage.service'; // Ajusta la ruta si tu carpeta services está en otra ubicación
 
 @Component({
   selector: 'app-root',
@@ -8,5 +9,16 @@ import { IonApp, IonRouterOutlet } from '@ionic/angular';
   imports: [IonApp, IonRouterOutlet],
 })
 export class AppComponent {
-  constructor() {}
+  constructor(
+    private platform: Platform,
+    private storageService: StorageService
+  ) {
+    this.initializeApp();
+  }
+
+  initializeApp() {
+    this.platform.ready().then(() => {
+      this.storageService.inicializarBaseDatos();
+    });
+  }
 }
