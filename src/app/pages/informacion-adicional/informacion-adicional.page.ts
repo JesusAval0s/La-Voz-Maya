@@ -23,7 +23,6 @@ export class InformacionAdicionalPage implements OnDestroy {
     p2_otro_texto: '',
     p3_covid: '',
     p4_con_quien_vive: '',
-    p4_otro_texto: '',
     p5_violencia: [] as string[],
     p5_otro_texto: '',
     p6_relaciones: {
@@ -38,9 +37,7 @@ export class InformacionAdicionalPage implements OnDestroy {
     p10_uso_lengua: 0,
     p11_frustracion_lengua: 0,
     p12_acude_problema: '',
-    p12_otro_texto: '',
     p13_pasatiempo: '',
-    p13_otro_texto: '',
     p14_bebida_energetica: '',
   };
 
@@ -156,7 +153,7 @@ export class InformacionAdicionalPage implements OnDestroy {
   public audioActivoKey: string | null = null;
   private currentAudio: HTMLAudioElement | null = null;
 
-  // Grabador directo
+  // Grabador directo (Solo operará en p2 y p5)
   public grabadorActivo: string | null = null;
   public audiosGrabados: { [key: string]: string } = {};
   public audiosBlob: { [key: string]: Blob } = {};
@@ -517,10 +514,7 @@ export class InformacionAdicionalPage implements OnDestroy {
       case 'p3':
         return !r.p3_covid;
       case 'p4':
-        return (
-          !r.p4_con_quien_vive ||
-          (r.p4_con_quien_vive === 'Otro' && !r.p4_otro_texto.trim() && !this.audiosGrabados['p4'])
-        );
+        return !r.p4_con_quien_vive;
       case 'p6': {
         const rel = r.p6_relaciones;
         return !rel.padre || !rel.madre || !rel.pareja || !rel.hijos;
@@ -532,15 +526,9 @@ export class InformacionAdicionalPage implements OnDestroy {
       case 'p9':
         return !r.p9_lengua_materna;
       case 'p12':
-        return (
-          !r.p12_acude_problema ||
-          (r.p12_acude_problema === 'Otro' && !r.p12_otro_texto.trim() && !this.audiosGrabados['p12'])
-        );
+        return !r.p12_acude_problema;
       case 'p13':
-        return (
-          !r.p13_pasatiempo ||
-          (r.p13_pasatiempo === 'Otro' && !r.p13_otro_texto.trim() && !this.audiosGrabados['p13'])
-        );
+        return !r.p13_pasatiempo;
       case 'p14':
         return !r.p14_bebida_energetica;
       default:
@@ -551,7 +539,6 @@ export class InformacionAdicionalPage implements OnDestroy {
   public guardarYContinuar(): void {
     this.intentoGuardar = true;
 
-    // Preguntas 10 y 11 removidas de las obligatorias
     const obligatorias = ['p3', 'p4', 'p6', 'p7', 'p8', 'p9', 'p12', 'p13', 'p14'];
     const hayError = obligatorias.some((p) => this.esInvalida(p));
 

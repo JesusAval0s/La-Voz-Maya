@@ -44,7 +44,7 @@
             </div>
           </section>
 
-          <!-- PREGUNTA 2 (MÚLTIPLES CON AUDIOS POR RESPUESTA) -->
+          <!-- PREGUNTA 2 (MÚLTIPLES CON AUDIOS Y TEXTO/GRABACIÓN EN 'OTRO') -->
           <section class="question-block">
             <div class="label-audio-row">
               <span class="field-label">2.- ¿Padece alguna de las siguientes enfermedades?</span>
@@ -66,6 +66,7 @@
               </div>
             </div>
 
+            <!-- PERMITIDO EN P2 -->
             <div class="other-input-container" *ngIf="respuestas.p2_enfermedades.includes('Otro')">
               <p class="specify-title">Especifica si seleccionaste 'Otro':</p>
               <div class="input-mic-row">
@@ -116,7 +117,7 @@
             </div>
           </section>
 
-          <!-- PREGUNTA 4 (SELECT COMPACTO CON BOTÓN DE AUDIO DINÁMICO) -->
+          <!-- PREGUNTA 4 (SELECT COMPACTO - SIN TEXTO NI AUDIO EXTRA EN OTRO) -->
           <section class="question-block" [class.has-error-block]="esInvalida('p4')">
             <div class="label-audio-row">
               <span class="field-label"><span class="required-asterisk">*</span> 4.- Actualmente ¿con quién vive?</span>
@@ -138,23 +139,9 @@
                 <img src="assets/icon/onda-sonora.png" alt="Audio respuesta" class="wave-icon" />
               </button>
             </div>
-
-            <div class="other-input-container" *ngIf="respuestas.p4_con_quien_vive === 'Otro'">
-              <p class="specify-title">Especifica si seleccionaste 'Otro':</p>
-              <div class="input-mic-row">
-                <input type="text" class="custom-input" placeholder="Escribe tu respuesta..." [(ngModel)]="respuestas.p4_otro_texto" />
-                <button *ngIf="!audiosGrabados['p4']" type="button" class="record-btn" [class.recording]="grabadorActivo === 'p4'" (click)="toggleGrabarAudio('p4')">
-                  <img src="assets/icon/microfono.png" alt="Grabar" class="mic-icon" />
-                </button>
-                <button *ngIf="audiosGrabados['p4']" type="button" class="playback-btn" (click)="escucharGrabacion('p4')">
-                  <img [src]="reproduciendoGrabacion === 'p4' ? 'assets/icon/pausa.png' : 'assets/icon/play.png'" alt="Reproducir" class="play-pause-icon" />
-                </button>
-                <button *ngIf="audiosGrabados['p4']" type="button" class="delete-audio-btn" (click)="eliminarAudio('p4')">✕</button>
-              </div>
-            </div>
           </section>
 
-          <!-- PREGUNTA 5 (MÚLTIPLES CON AUDIOS POR RESPUESTA) -->
+          <!-- PREGUNTA 5 (MÚLTIPLES CON AUDIOS Y TEXTO/GRABACIÓN EN 'OTRO') -->
           <section class="question-block">
             <div class="label-audio-row">
               <span class="field-label">5.- ¿Ha experimentado algún tipo de violencia?</span>
@@ -176,6 +163,7 @@
               </div>
             </div>
 
+            <!-- PERMITIDO EN P5 -->
             <div class="other-input-container" *ngIf="respuestas.p5_violencia.includes('Otra')">
               <p class="specify-title">Especifica si seleccionaste 'Otra':</p>
               <div class="input-mic-row">
@@ -395,7 +383,7 @@
             </div>
           </section>
 
-          <!-- PREGUNTA 12 (SELECT CON AUDIO DINÁMICO) -->
+          <!-- PREGUNTA 12 (SELECT CON AUDIO DINÁMICO - SIN TEXTO NI AUDIO EXTRA EN OTRO) -->
           <section class="question-block" [class.has-error-block]="esInvalida('p12')">
             <div class="label-audio-row">
               <span class="field-label"><span class="required-asterisk">*</span> 12.- ¿A quién sueles acudir cuando tienes algún problema?</span>
@@ -417,23 +405,9 @@
                 <img src="assets/icon/onda-sonora.png" alt="Audio respuesta" class="wave-icon" />
               </button>
             </div>
-
-            <div class="other-input-container" *ngIf="respuestas.p12_acude_problema === 'Otro'">
-              <p class="specify-title">Especifica si seleccionaste 'Otro':</p>
-              <div class="input-mic-row">
-                <input type="text" class="custom-input" placeholder="Escribe tu respuesta..." [(ngModel)]="respuestas.p12_otro_texto" />
-                <button *ngIf="!audiosGrabados['p12']" type="button" class="record-btn" [class.recording]="grabadorActivo === 'p12'" (click)="toggleGrabarAudio('p12')">
-                  <img src="assets/icon/microfono.png" alt="Grabar" class="mic-icon" />
-                </button>
-                <button *ngIf="audiosGrabados['p12']" type="button" class="playback-btn" (click)="escucharGrabacion('p12')">
-                  <img [src]="reproduciendoGrabacion === 'p12' ? 'assets/icon/pausa.png' : 'assets/icon/play.png'" alt="Reproducir" class="play-pause-icon" />
-                </button>
-                <button *ngIf="audiosGrabados['p12']" type="button" class="delete-audio-btn" (click)="eliminarAudio('p12')">✕</button>
-              </div>
-            </div>
           </section>
 
-          <!-- PREGUNTA 13 (SELECT CON AUDIO DINÁMICO) -->
+          <!-- PREGUNTA 13 (SELECT CON AUDIO DINÁMICO - SIN TEXTO NI AUDIO EXTRA EN OTRO) -->
           <section class="question-block" [class.has-error-block]="esInvalida('p13')">
             <div class="label-audio-row">
               <span class="field-label"><span class="required-asterisk">*</span> 13.- ¿Cuál es tu pasatiempo principal?</span>
@@ -454,20 +428,6 @@
                       (click)="reproducirAudioRespuesta(getAudioKeyP13())">
                 <img src="assets/icon/onda-sonora.png" alt="Audio respuesta" class="wave-icon" />
               </button>
-            </div>
-
-            <div class="other-input-container" *ngIf="respuestas.p13_pasatiempo === 'Otro'">
-              <p class="specify-title">Especifica si seleccionaste 'Otro':</p>
-              <div class="input-mic-row">
-                <input type="text" class="custom-input" placeholder="Escribe tu respuesta..." [(ngModel)]="respuestas.p13_otro_texto" />
-                <button *ngIf="!audiosGrabados['p13']" type="button" class="record-btn" [class.recording]="grabadorActivo === 'p13'" (click)="toggleGrabarAudio('p13')">
-                  <img src="assets/icon/microfono.png" alt="Grabar" class="mic-icon" />
-                </button>
-                <button *ngIf="audiosGrabados['p13']" type="button" class="playback-btn" (click)="escucharGrabacion('p13')">
-                  <img [src]="reproduciendoGrabacion === 'p13' ? 'assets/icon/pausa.png' : 'assets/icon/play.png'" alt="Reproducir" class="play-pause-icon" />
-                </button>
-                <button *ngIf="audiosGrabados['p13']" type="button" class="delete-audio-btn" (click)="eliminarAudio('p13')">✕</button>
-              </div>
             </div>
           </section>
 

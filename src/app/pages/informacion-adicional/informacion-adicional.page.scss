@@ -10,46 +10,25 @@
     overflow-y: hidden;
   }
 
+  /* CABECERA ESTÁNDAR UNIFICADA (SOLO LOGO LA VOZ MAYA) */
   .header-section {
-    padding: 0.8rem 1.4rem 0 1.4rem;
+    padding: 0.2rem 1.4rem 0 1.4rem;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     min-height: 110px;
 
-    .institutional-row {
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-
-      .inst-logo {
-        height: 52px;
-        max-width: 95px;
-        object-fit: contain;
-
-        &.left {
-          transform: scale(1.25);
-        }
-
-        &.right {
-          transform: scale(1.35);
-          transform-origin: center right;
-        }
-      }
-    }
-
     .brand-row {
-      margin-top: -22px;
       display: flex;
       justify-content: center;
       align-items: center;
+      margin-top: -5px;
 
       .maya-logo-main {
-        height: 100px;
+        height: 105px;
         width: auto;
-        max-width: 175px;
+        max-width: 190px;
         object-fit: contain;
         display: block;
       }
