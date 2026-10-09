@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { IonContent } from '@ionic/angular';
+import { StorageService } from '../../core/services/storage.service';
 
 interface OpcionConAudio {
   texto: string;
@@ -168,7 +169,8 @@ export class InformacionAdicionalPage implements OnDestroy {
 
   constructor(
     private router: Router,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private storageService: StorageService
   ) {}
 
   ngOnDestroy(): void {
@@ -536,7 +538,7 @@ export class InformacionAdicionalPage implements OnDestroy {
     }
   }
 
-  public guardarYContinuar(): void {
+  public async guardarYContinuar(): Promise<void> {
     this.intentoGuardar = true;
 
     const obligatorias = ['p3', 'p4', 'p6', 'p7', 'p8', 'p9', 'p12', 'p13', 'p14'];
@@ -548,7 +550,31 @@ export class InformacionAdicionalPage implements OnDestroy {
     this.detenerGrabacionSiExiste();
     this.detenerPlaybackGrabado();
 
-    console.log('Información Adicional enviada:', this.respuestas);
-    this.router.navigate(['/habitos-alimentacion']);
+    try {
+      // Generar un ID o folio único para la encuesta (puedes ajustarlo según tu lógica de folios)
+      const encuestaId = `FOLIO_${Date.now()}`;
+
+      // 1. Guardar las respuestas estructuradas en la tabla SQLite de respuestas
+      await this.storageService.guardarRespuestasCuestionario(
+        encuestaId,
+        'informacion_adicional',
+        this.respuestas
+      );
+
+      // 2. Guardar los audios de la pregunta 2 ('p2') si existen localmente
+      if (this.audiosBlob['p2']) {
+        await this.storageService.guardarAudioLocal(encuestaId, 'p2_enfermedad_otro', this.audiosBlob['p2']);
+      }
+
+      // 3. Guardar los audios de la pregunta 5 ('p5') si existen localmente
+      if (this.audiosBlob['p5']) {
+        await this.storageService.guardarAudioLocal(encuestaId, 'p5_violencia_otra', this.audiosBlob['p5']);
+      }
+
+      console.log('Información Adicional guardada localmente con éxito en SQLite y Filesystem.');
+      this.router.navigate(['/habitos-alimentacion']);
+    } catch (error) {
+      console.error('Error al persistir la información adicional de forma local:', error);
+    }
   }
 }
