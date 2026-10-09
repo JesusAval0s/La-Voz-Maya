@@ -128,7 +128,14 @@ export class StorageService {
     });
   }
 
+  private async esperarConexion(): Promise<void> {
+    while (!this.db) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+  }
+
   async guardarRespuestasCuestionario(encuestaId: string, cuestionarioNombre: string, respuestas: any) {
+    await this.esperarConexion();
     if (!this.db) return;
 
     const datosJson = JSON.stringify(respuestas);
