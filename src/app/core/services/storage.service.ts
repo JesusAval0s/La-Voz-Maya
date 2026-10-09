@@ -128,21 +128,33 @@ export class StorageService {
     });
   }
 
-  private async esperarConexion(): Promise<void> {
-    while (!this.db) {
+  private async esperarConexion(): Promise<boolean> {
+    let intentos = 0;
+    while (!this.db && intentos < 30) { // Máximo 3 segundos de espera (30 * 100ms)
       await new Promise(resolve => setTimeout(resolve, 100));
+      intentos++;
     }
+    return !!this.db;
   }
 
   async guardarRespuestasCuestionario(encuestaId: string, cuestionarioNombre: string, respuestas: any) {
-    await this.esperarConexion();
-    if (!this.db) return;
+    const conexionLista = await this.esperarConexion();
+    if (!conexionLista || !this.db) {
+      console.error('No se pudo guardar: La base de datos no está inicializada.');
+      return;
+    }
 
-    const datosJson = JSON.stringify(respuestas);
-    const fechaActual = new Date().toISOString();
-    const sql = `INSERT INTO respuestas_cuestionarios (encuesta_id, cuestionario_nombre, datos_json, estado_sincronizacion, fecha) VALUES (?, ?, ?, 'local', ?);`;
-    
-    await this.db.run(sql, [encuestaId, cuestionarioNombre, datosJson, fechaActual]);
+    try {
+      const datosJson = JSON.stringify(respuestas);
+      const fechaActual = new Date().toISOString();
+      const sql = `INSERT INTO respuestas_cuestionarios (encuesta_id, cuestionario_nombre, datos_json, estado_sincronizacion, fecha) VALUES (?, ?, ?, 'local', ?);`;
+      
+      await this.db.run(sql, [encuestaId, cuestionarioNombre, datosJson, fechaActual]);
+      console.log('Guardado exitoso en SQLite para:', cuestionarioNombre);
+    } catch (error) {
+      console.error('Error al ejecutar la consulta SQL:', error);
+      throw error;
+    }
   }
 
   async obtenerCuestionariosLocales(): Promise<CuestionarioRegistro[]> {
