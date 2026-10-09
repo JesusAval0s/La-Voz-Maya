@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { IonContent } from '@ionic/angular';
+import { StorageService } from '../../core/services/storage.service';
 
 @Component({
   selector: 'app-datos-generales',
@@ -50,7 +51,8 @@ export class DatosGeneralesPage implements OnDestroy {
 
   constructor(
     private router: Router,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private storageService: StorageService
   ) {}
 
   ngOnDestroy(): void {
@@ -208,7 +210,7 @@ export class DatosGeneralesPage implements OnDestroy {
     this.cdr.detectChanges();
   }
 
-  public validarFormulario(): void {
+  public async validarFormulario(): Promise<void> {
     this.intentoGuardar = true;
 
     const obligatorios = [
@@ -231,13 +233,28 @@ export class DatosGeneralesPage implements OnDestroy {
     }
 
     this.detenerAudio();
-    console.log('Datos Generales guardados con éxito:', this.formulario);
-    this.router.navigate(['/informacion-adicional']);
+
+    try {
+      // Generarando ID para folio
+      const encuestaId = `FOLIO_${Date.now()}`;
+
+      // Guardando los datos generales estructurados en la base de datos local SQLite
+      await this.storageService.guardarRespuestasCuestionario(
+        encuestaId,
+        'datos_generales',
+        this.formulario
+      );
+
+      console.log('Datos Generales guardados localmente con éxito en SQLite.');
+      this.router.navigate(['/informacion-adicional']);
+    } catch (error) {
+      console.error('Error al persistir los datos generales localmente:', error);
+    }
   }
 
-  /**
-   * Método puente para emparejar la llamada del HTML con la validación existente
-   */
+  
+    // Método puente para emparejar la llamada del HTML con la validación existente
+
   public guardarYContinuar(): void {
     this.validarFormulario();
   }
