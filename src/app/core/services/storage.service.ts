@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Capacitor } from '@capacitor/core';
 import { CapacitorSQLite, SQLiteConnection, SQLiteDBConnection } from '@capacitor-community/sqlite';
 import { Filesystem, Directory } from '@capacitor/filesystem';
+import { Device } from '@capacitor/device';
 
 export interface CuestionarioRegistro {
   id: number | string;
@@ -18,36 +19,56 @@ export interface CuestionarioRegistro {
 export class StorageService {
   private sqlite: SQLiteConnection = new SQLiteConnection(CapacitorSQLite);
   private db: SQLiteDBConnection | null = null;
+  private dbName = 'la_voz_maya_db'; // <--- ¡Aquí definimos el nombre de la base de datos!
   private isWeb: boolean = false;
 
   constructor() {}
 
-  async inicializarBaseDatos() {
-    try {
-      const platform = Capacitor.getPlatform();
-      this.isWeb = platform === 'web';
+  private static isWebStoreInitialized = false;
 
-      if (this.isWeb) {
-        await this.sqlite.initWebStore();
+  async inicializarBaseDatos() {
+  try {
+    const info = await Device.getInfo();
+    this.isWeb = info.platform === 'web' || Capacitor.getPlatform() === 'web';
+
+    if (this.isWeb) {
+      // 1. Esperar a que el navegador registre el Custom Element de jeep-sqlite
+      await customElements.whenDefined('jeep-sqlite');
+      
+      const jeepEl = document.querySelector('jeep-sqlite');
+      if (jeepEl) {
+        // 2. Esperar a que el componente esté hidratado en el DOM
+        await (jeepEl as any).componentOnReady?.();
       }
 
+      // 3. Inicializar el WebStore
+      await this.sqlite.initWebStore();
+    }
+
+    // 4. Crear y abrir conexión
+    const checkConn = await this.sqlite.isConnection(this.dbName, false);
+    if (checkConn.result) {
+      this.db = await this.sqlite.retrieveConnection(this.dbName, false);
+    } else {
       this.db = await this.sqlite.createConnection(
-        'la_voz_maya_db',
+        this.dbName,
         false,
         'no-encryption',
         1,
         false
       );
-
-      await this.db.open();
-      await this.crearTablas();
-      await this.crearCarpetasLocales();
-
-      console.log('Base de datos y sistema de archivos inicializados correctamente.');
-    } catch (error) {
-      console.error('Error al inicializar el almacenamiento local:', error);
     }
+
+    await this.db.open();
+    await this.crearTablas();
+    await this.crearCarpetasLocales();
+
+    console.log('Base de datos inicializada y abierta exitosamente.');
+  } catch (error) {
+    console.error('Error al inicializar el almacenamiento local:', error);
+    throw error;
   }
+}
 
   private async crearTablas() {
     if (!this.db) return;
@@ -130,7 +151,7 @@ export class StorageService {
 
   private async esperarConexion(): Promise<boolean> {
     let intentos = 0;
-    while (!this.db && intentos < 30) { // Máximo 3 segundos de espera (30 * 100ms)
+    while (!this.db && intentos < 30) {
       await new Promise(resolve => setTimeout(resolve, 100));
       intentos++;
     }
@@ -138,18 +159,51 @@ export class StorageService {
   }
 
   async guardarRespuestasCuestionario(encuestaId: string, cuestionarioNombre: string, respuestas: any) {
+    if (!this.db) {
+      await this.inicializarBaseDatos();
+    }
+
+    try {
+      if (this.db) {
+        const isOpen = await this.db.isDBOpen();
+        if (!isOpen.result) {
+          await this.db.open();
+        }
+      }
+    } catch (e) {
+      // Ignorar si ya está abierta
+    }
+
     const conexionLista = await this.esperarConexion();
     if (!conexionLista || !this.db) {
       console.error('No se pudo guardar: La base de datos no está inicializada.');
-      return;
+      throw new Error('La base de datos SQLite no está inicializada.');
     }
 
     try {
       const datosJson = JSON.stringify(respuestas);
       const fechaActual = new Date().toISOString();
-      const sql = `INSERT INTO respuestas_cuestionarios (encuesta_id, cuestionario_nombre, datos_json, estado_sincronizacion, fecha) VALUES (?, ?, ?, 'local', ?);`;
-      
+
+      // 1. Asegurar que la encuesta exista en la tabla padre 'encuestas'
+      const sqlEncuesta = `
+        INSERT OR IGNORE INTO encuestas (id, folio, fecha_creacion, sincronizado) 
+        VALUES (?, ?, ?, 0);
+      `;
+      await this.db.run(sqlEncuesta, [encuestaId, respuestas.folio || encuestaId, fechaActual]);
+
+      // 2. Insertar las respuestas asociadas
+      const sql = `
+        INSERT INTO respuestas_cuestionarios 
+        (encuesta_id, cuestionario_nombre, datos_json, estado_sincronizacion, fecha) 
+        VALUES (?, ?, ?, 'local', ?);
+      `;
       await this.db.run(sql, [encuestaId, cuestionarioNombre, datosJson, fechaActual]);
+      
+      // Respaldo en IndexedDB para la plataforma web
+      if (this.isWeb) {
+        await this.sqlite.saveToStore(this.dbName);
+      }
+
       console.log('Guardado exitoso en SQLite para:', cuestionarioNombre);
     } catch (error) {
       console.error('Error al ejecutar la consulta SQL:', error);
@@ -158,9 +212,15 @@ export class StorageService {
   }
 
   async obtenerCuestionariosLocales(): Promise<CuestionarioRegistro[]> {
-    if (!this.db) return [];
+    if (!this.db) {
+      await this.inicializarBaseDatos();
+    }
     try {
-      const res = await this.db.query('SELECT * FROM respuestas_cuestionarios;');
+      if (this.db) {
+        const isOpen = await this.db.isDBOpen();
+        if (!isOpen.result) await this.db.open();
+      }
+      const res = await this.db!.query('SELECT * FROM respuestas_cuestionarios;');
       if (res && res.values) {
         return res.values.map((row: any) => ({
           id: row.id,
@@ -182,8 +242,62 @@ export class StorageService {
     try {
       const sql = `UPDATE respuestas_cuestionarios SET estado_sincronizacion = ? WHERE id = ?;`;
       await this.db.run(sql, [estado, id]);
+      if (this.isWeb) {
+        await this.sqlite.saveToStore(this.dbName);
+      }
     } catch (e) {
       console.error('Error al actualizar estado de sincronización:', e);
     }
   }
+
+  async imprimirRespuestasEnConsola(cuestionarioNombre?: string) {
+    if (!this.db) {
+      await this.inicializarBaseDatos();
+    }
+
+    try {
+      let sql = 'SELECT id, encuesta_id, cuestionario_nombre, datos_json, fecha FROM respuestas_cuestionarios';
+      const params: any[] = [];
+
+      if (cuestionarioNombre) {
+        sql += ' WHERE cuestionario_nombre = ?';
+        params.push(cuestionarioNombre);
+      }
+
+      sql += ' ORDER BY id DESC;';
+
+      const res = await this.db!.query(sql, params);
+      const registros = res.values || [];
+
+      if (registros.length === 0) {
+        console.warn('No hay respuestas guardadas en la base de datos.');
+        return;
+      }
+
+      console.group('%c=== RESPUESTAS ALMACENADAS EN SQLITE ===', 'color: #3880ff; font-weight: bold; font-size: 13px;');
+
+      registros.forEach((row: any) => {
+        let respuestasParseadas: Record<string, any> = {};
+        try {
+          respuestasParseadas = JSON.parse(row.datos_json || '{}');
+        } catch {
+          respuestasParseadas = { raw: row.datos_json };
+        }
+
+        console.log(`Leido: [${row.cuestionario_nombre}] (Encuesta: ${row.encuesta_id})`, respuestasParseadas);
+
+        const tablaDetalle = Object.entries(respuestasParseadas).map(([pregunta, respuesta]) => ({
+          'Pregunta / Campo': pregunta,
+          'Respuesta': typeof respuesta === 'object' ? JSON.stringify(respuesta) : respuesta
+        }));
+
+        console.table(tablaDetalle);
+      });
+
+      console.groupEnd();
+    } catch (error) {
+      console.error('Error al leer e imprimir respuestas locales:', error);
+    }
+  }
+
 }

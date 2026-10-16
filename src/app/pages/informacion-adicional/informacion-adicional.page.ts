@@ -551,22 +551,23 @@ export class InformacionAdicionalPage implements OnDestroy {
     this.detenerPlaybackGrabado();
 
     try {
-      // Generar un ID o folio único para la encuesta (puedes ajustarlo según tu lógica de folios)
+      // Generarando ID para folio
       const encuestaId = `FOLIO_${Date.now()}`;
 
-      // 1. Guardar las respuestas estructuradas en la tabla SQLite de respuestas
+      // Guardando respuestas en las tablas
+
       await this.storageService.guardarRespuestasCuestionario(
         encuestaId,
         'informacion_adicional',
         this.respuestas
       );
 
-      // 2. Guardar los audios de la pregunta 2 ('p2') si existen localmente
+      // Guardar los audios de la pregunta 2 
       if (this.audiosBlob['p2']) {
         await this.storageService.guardarAudioLocal(encuestaId, 'p2_enfermedad_otro', this.audiosBlob['p2']);
       }
 
-      // 3. Guardar los audios de la pregunta 5 ('p5') si existen localmente
+      // Guardar los audios de la pregunta 5 
       if (this.audiosBlob['p5']) {
         await this.storageService.guardarAudioLocal(encuestaId, 'p5_violencia_otra', this.audiosBlob['p5']);
       }

@@ -210,6 +210,8 @@ export class DatosGeneralesPage implements OnDestroy {
     this.cdr.detectChanges();
   }
 
+
+
   public async validarFormulario(): Promise<void> {
     this.intentoGuardar = true;
 
@@ -245,6 +247,12 @@ export class DatosGeneralesPage implements OnDestroy {
         this.formulario
       );
 
+
+      // LLAMADA PARA IMPRIMIR EN CONSOLA:
+      await this.storageService.imprimirRespuestasEnConsola('datos_generales');
+
+
+      
       console.log('Datos Generales guardados localmente con éxito en SQLite.');
       this.router.navigate(['/informacion-adicional']);
     } catch (error) {
