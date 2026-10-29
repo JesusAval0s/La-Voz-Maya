@@ -16,11 +16,12 @@ export interface CuestionarioRegistro {
 @Injectable({
   providedIn: 'root'
 })
-export class StorageService {
+export class SqliteStorageService {
   private sqlite: SQLiteConnection = new SQLiteConnection(CapacitorSQLite);
   private db: SQLiteDBConnection | null = null;
   private dbName = 'la_voz_maya_db'; // <--- ¡Aquí definimos el nombre de la base de datos!
   private isWeb: boolean = false;
+  private folioActivo: string | null = null;
 
   constructor() {}
 
@@ -118,16 +119,31 @@ export class StorageService {
     }
   }
 
-  async guardarAudioLocal(folio: string, preguntaKey: string, audioBlob: Blob): Promise<string> {
+  async guardarAudioLocal(folio: string, preguntaKey: string, audioBlob: Blob, cuestionarioNombre: string = 'general'): Promise<string> {
     try {
       const base64Data = await this.blobToBase64(audioBlob);
       const fileName = `la_voz_maya_audios/${folio}_${preguntaKey}_${Date.now()}.wav`;
 
+      // 1. Guardar archivo físico en disco
       await Filesystem.writeFile({
         path: fileName,
         data: base64Data,
         directory: Directory.Data
       });
+
+      // 2. Registrar la referencia en SQLite
+      if (!this.db) await this.inicializarBaseDatos();
+      if (this.db) {
+        const sqlAudio = `
+          INSERT INTO audios_respuestas (encuesta_id, cuestionario_nombre, pregunta_key, ruta_local)
+          VALUES (?, ?, ?, ?);
+        `;
+        await this.db.run(sqlAudio, [folio, cuestionarioNombre, preguntaKey, fileName]);
+
+        if (this.isWeb) {
+          await this.sqlite.saveToStore(this.dbName);
+        }
+      }
 
       return fileName;
     } catch (error) {
@@ -156,6 +172,35 @@ export class StorageService {
       intentos++;
     }
     return !!this.db;
+  }
+
+  public setFolioActivo(folio: string): void {
+    this.folioActivo = folio;
+    try {
+      localStorage.setItem('folio_activo', folio);
+    } catch (e) {
+      console.warn('No se pudo persistir el folio en localStorage:', e);
+    }
+  }
+
+  public getFolioActivo(): string | null {
+    if (!this.folioActivo) {
+      try {
+        this.folioActivo = localStorage.getItem('folio_activo');
+      } catch (e) {
+        console.warn('No se pudo recuperar el folio de localStorage:', e);
+      }
+    }
+    return this.folioActivo;
+  }
+
+  public limpiarFolioActivo(): void {
+    this.folioActivo = null;
+    try {
+      localStorage.removeItem('folio_activo');
+    } catch (e) {
+      console.warn('Error al limpiar el folio de localStorage:', e);
+    }
   }
 
   async guardarRespuestasCuestionario(encuestaId: string, cuestionarioNombre: string, respuestas: any) {
@@ -211,6 +256,35 @@ export class StorageService {
     }
   }
 
+  async obtenerRespuestasCuestionario(encuestaId: string, cuestionarioNombre: string): Promise<any | null> {
+    if (!this.db) {
+      await this.inicializarBaseDatos();
+    }
+
+    try {
+      if (this.db) {
+        const isOpen = await this.db.isDBOpen();
+        if (!isOpen.result) await this.db.open();
+      }
+
+      const sql = `
+        SELECT datos_json 
+        FROM respuestas_cuestionarios 
+        WHERE encuesta_id = ? AND cuestionario_nombre = ? 
+        ORDER BY id DESC LIMIT 1;
+      `;
+      const res = await this.db!.query(sql, [encuestaId, cuestionarioNombre]);
+
+      if (res && res.values && res.values.length > 0) {
+        return JSON.parse(res.values[0].datos_json || '{}');
+      }
+      return null;
+    } catch (error) {
+      console.error(`Error al recuperar respuestas para [${cuestionarioNombre}]:`, error);
+      return null;
+    }
+  }
+
   async obtenerCuestionariosLocales(): Promise<CuestionarioRegistro[]> {
     if (!this.db) {
       await this.inicializarBaseDatos();
@@ -250,54 +324,59 @@ export class StorageService {
     }
   }
 
-  async imprimirRespuestasEnConsola(cuestionarioNombre?: string) {
-    if (!this.db) {
-      await this.inicializarBaseDatos();
-    }
-
-    try {
-      let sql = 'SELECT id, encuesta_id, cuestionario_nombre, datos_json, fecha FROM respuestas_cuestionarios';
-      const params: any[] = [];
-
-      if (cuestionarioNombre) {
-        sql += ' WHERE cuestionario_nombre = ?';
-        params.push(cuestionarioNombre);
-      }
-
-      sql += ' ORDER BY id DESC;';
-
-      const res = await this.db!.query(sql, params);
-      const registros = res.values || [];
-
-      if (registros.length === 0) {
-        console.warn('No hay respuestas guardadas en la base de datos.');
-        return;
-      }
-
-      console.group('%c=== RESPUESTAS ALMACENADAS EN SQLITE ===', 'color: #3880ff; font-weight: bold; font-size: 13px;');
-
-      registros.forEach((row: any) => {
-        let respuestasParseadas: Record<string, any> = {};
-        try {
-          respuestasParseadas = JSON.parse(row.datos_json || '{}');
-        } catch {
-          respuestasParseadas = { raw: row.datos_json };
-        }
-
-        console.log(`Leido: [${row.cuestionario_nombre}] (Encuesta: ${row.encuesta_id})`, respuestasParseadas);
-
-        const tablaDetalle = Object.entries(respuestasParseadas).map(([pregunta, respuesta]) => ({
-          'Pregunta / Campo': pregunta,
-          'Respuesta': typeof respuesta === 'object' ? JSON.stringify(respuesta) : respuesta
-        }));
-
-        console.table(tablaDetalle);
-      });
-
-      console.groupEnd();
-    } catch (error) {
-      console.error('Error al leer e imprimir respuestas locales:', error);
-    }
+  async imprimirRespuestasEnConsola(cuestionarioNombre?: string, encuestaId?: string) {
+  if (!this.db) {
+    await this.inicializarBaseDatos();
   }
+
+  try {
+    let sql = 'SELECT id, encuesta_id, cuestionario_nombre, datos_json, fecha FROM respuestas_cuestionarios WHERE 1=1';
+    const params: any[] = [];
+
+    // Filtro por nombre de cuestionario
+    if (cuestionarioNombre) {
+      sql += ' AND cuestionario_nombre = ?';
+      params.push(cuestionarioNombre);
+    }
+
+    // Filtro por folio de encuesta activa
+    if (encuestaId) {
+      sql += ' AND encuesta_id = ?';
+      params.push(encuestaId);
+    }
+
+    sql += ' ORDER BY id DESC LIMIT 1;'; // Trae el registro más reciente
+
+    const res = await this.db!.query(sql, params);
+    const registros = res.values || [];
+
+    if (registros.length === 0) {
+      console.warn(`No hay respuestas guardadas para el cuestionario: [${cuestionarioNombre || 'TODOS'}]`);
+      return;
+    }
+
+    
+
+    registros.forEach((row: any) => {
+      let respuestasParseadas: Record<string, any> = {};
+      try {
+        respuestasParseadas = JSON.parse(row.datos_json || '{}');
+      } catch {
+        respuestasParseadas = { raw: row.datos_json };
+      }
+
+      const tablaDetalle = Object.entries(respuestasParseadas).map(([pregunta, respuesta]) => ({
+        'Pregunta / Campo': pregunta,
+        'Respuesta': typeof respuesta === 'object' ? JSON.stringify(respuesta) : respuesta
+      }));
+
+      console.table(tablaDetalle);
+    });
+
+    console.groupEnd();
+  } catch (error) {
+    console.error('Error al leer e imprimir respuestas locales:', error);
+  }
+}
 
 }

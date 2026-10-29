@@ -1,9 +1,10 @@
-import { Component, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component,OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { IonContent } from '@ionic/angular';
-import { StorageService } from '../../core/services/storage.service';
+import { SqliteStorageService } from '../../core/services/sqlite-storage.service';
+
 
 interface OpcionConAudio {
   texto: string;
@@ -17,7 +18,7 @@ interface OpcionConAudio {
   standalone: true,
   imports: [CommonModule, FormsModule, IonContent],
 })
-export class InformacionAdicionalPage implements OnDestroy {
+export class InformacionAdicionalPage implements OnInit, OnDestroy {
   public respuestas = {
     p1_suicidio_circulo: [] as string[],
     p2_enfermedades: [] as string[],
@@ -167,10 +168,18 @@ export class InformacionAdicionalPage implements OnDestroy {
   private audioInput: MediaStreamAudioSourceNode | null = null;
   private pcmBuffers: Float32Array[] = [];
 
+    ngOnInit(): void {
+    const folio = this.storageService.getFolioActivo();
+    if (!folio) {
+      console.warn('⚠️ No se detectó un folio activo. Redirigiendo a Datos Generales...');
+      this.router.navigate(['/datos-generales']);
+    }
+  }
+
   constructor(
     private router: Router,
     private cdr: ChangeDetectorRef,
-    private storageService: StorageService
+    private storageService: SqliteStorageService
   ) {}
 
   ngOnDestroy(): void {
@@ -537,45 +546,73 @@ export class InformacionAdicionalPage implements OnDestroy {
         return false;
     }
   }
-
+  
   public async guardarYContinuar(): Promise<void> {
     this.intentoGuardar = true;
+
+    // Regla automática: Si la pregunta 1 se dejó vacía, marcar 'Ninguno'
+    if (this.respuestas.p1_suicidio_circulo.length === 0) {
+      this.respuestas.p1_suicidio_circulo = ['Ninguno'];
+    }
 
     const obligatorias = ['p3', 'p4', 'p6', 'p7', 'p8', 'p9', 'p12', 'p13', 'p14'];
     const hayError = obligatorias.some((p) => this.esInvalida(p));
 
-    if (hayError) return;
+    if (hayError) {
+      console.warn('Faltan campos obligatorios por completar en Información Adicional.');
+      return;
+    }
 
     this.detenerAudio();
     this.detenerGrabacionSiExiste();
     this.detenerPlaybackGrabado();
 
     try {
-      // Generarando ID para folio
-      const encuestaId = `FOLIO_${Date.now()}`;
+      // 1. Obtener el folio activo obligatorio (sin inventar uno nuevo)
+      const encuestaId = this.storageService.getFolioActivo();
+      if (!encuestaId) {
+        console.error('No hay folio activo. Redirigiendo a Datos Generales...');
+        this.router.navigate(['/datos-generales']);
+        return;
+      }
 
-      // Guardando respuestas en las tablas
-
+      // 2. Guardar las respuestas estructuradas en SQLite
       await this.storageService.guardarRespuestasCuestionario(
         encuestaId,
         'informacion_adicional',
         this.respuestas
       );
 
-      // Guardar los audios de la pregunta 2 
+      // 3. Persistir físicamente el audio de P2 si existe grabación
       if (this.audiosBlob['p2']) {
-        await this.storageService.guardarAudioLocal(encuestaId, 'p2_enfermedad_otro', this.audiosBlob['p2']);
+        await this.storageService.guardarAudioLocal(
+          encuestaId,
+          'p2_enfermedad_otro',
+          this.audiosBlob['p2']
+        );
       }
 
-      // Guardar los audios de la pregunta 5 
+      // 4. Persistir físicamente el audio de P5 si existe grabación
       if (this.audiosBlob['p5']) {
-        await this.storageService.guardarAudioLocal(encuestaId, 'p5_violencia_otra', this.audiosBlob['p5']);
+        await this.storageService.guardarAudioLocal(
+          encuestaId,
+          'p5_violencia_otra',
+          this.audiosBlob['p5']
+        );
       }
 
-      console.log('Información Adicional guardada localmente con éxito en SQLite y Filesystem.');
+      console.log(`Información Adicional guardada con éxito para el folio: ${encuestaId}`);
+
+      // 5. Imprimir en consola únicamente las respuestas de esta sección
+      await this.storageService.imprimirRespuestasEnConsola('informacion_adicional', encuestaId);
+
+      // 6. Quitar foco para evitar advertencias de accesibilidad y avanzar
+      (document.activeElement as HTMLElement)?.blur();
       this.router.navigate(['/habitos-alimentacion']);
     } catch (error) {
       console.error('Error al persistir la información adicional de forma local:', error);
     }
   }
+  
+  
 }

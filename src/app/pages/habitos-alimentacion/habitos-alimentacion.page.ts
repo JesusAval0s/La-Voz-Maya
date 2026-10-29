@@ -1,8 +1,10 @@
-import { Component, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { IonContent } from '@ionic/angular';
+import { SqliteStorageService } from '../../core/services/sqlite-storage.service';
+
 
 interface OpcionAlimentacion {
   texto: string;
@@ -24,7 +26,7 @@ interface PreguntaAlimentacion {
   standalone: true,
   imports: [CommonModule, FormsModule, IonContent],
 })
-export class HabitosAlimentacionPage implements OnDestroy {
+export class HabitosAlimentacionPage implements OnInit, OnDestroy {
   public respuestas = {
     p1_emociones_alimentacion: '',
     p2_comido_mas: '',
@@ -92,8 +94,17 @@ export class HabitosAlimentacionPage implements OnDestroy {
 
   constructor(
     private router: Router,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private storageService: SqliteStorageService
   ) {}
+
+  ngOnInit(): void {
+    const folio = this.storageService.getFolioActivo();
+    if (!folio) {
+      console.warn('⚠️ No se detectó un folio activo. Redirigiendo a Datos Generales...');
+      this.router.navigate(['/datos-generales']);
+    }
+  }
 
   ngOnDestroy(): void {
     this.detenerAudio();
@@ -199,16 +210,45 @@ export class HabitosAlimentacionPage implements OnDestroy {
     }
   }
 
-  public guardarYContinuar(): void {
+  public async guardarYContinuar(): Promise<void> {
     this.intentoGuardar = true;
 
     const obligatorias = ['p1', 'p2', 'p3', 'p4', 'p5'];
     const hayError = obligatorias.some((p) => this.esInvalida(p));
 
-    if (hayError) return;
+    if (hayError) {
+      console.warn('Faltan campos obligatorios por completar en Hábitos de Alimentación.');
+      return;
+    }
 
     this.detenerAudio();
-    console.log('Hábitos de Alimentación completados:', this.respuestas);
-    this.router.navigate(['/habitos-sueno']);
+
+    try {
+      // 1. Obtener el folio activo de la sesión
+      const encuestaId = this.storageService.getFolioActivo();
+      if (!encuestaId) {
+        console.error('No hay folio activo. Redirigiendo a Datos Generales...');
+        this.router.navigate(['/datos-generales']);
+        return;
+      }
+
+      // 2. Guardar respuestas en SQLite
+      await this.storageService.guardarRespuestasCuestionario(
+        encuestaId,
+        'habitos_alimentacion',
+        this.respuestas
+      );
+
+      console.log(`Hábitos de Alimentación guardados con éxito para el folio: ${encuestaId}`);
+
+      // 3. Imprimir tabla en consola para auditar los datos de este cuestionario
+      await this.storageService.imprimirRespuestasEnConsola('habitos_alimentacion', encuestaId);
+
+      // 4. Quitar foco para prevenir la advertencia aria-hidden y avanzar
+      (document.activeElement as HTMLElement)?.blur();
+      this.router.navigate(['/habitos-sueno']);
+    } catch (error) {
+      console.error('Error al persistir hábitos de alimentación localmente:', error);
+    }
   }
 }

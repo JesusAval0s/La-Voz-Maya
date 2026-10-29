@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { IonContent, IonIcon } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import { cloudUploadOutline } from 'ionicons/icons';
-import { StorageService } from '../../core/services/storage.service'; // Asegúrate de importar tu servicio de almacenamiento
+import { SqliteStorageService } from '../../core/services/sqlite-storage.service'; // Asegúrate de importar tu servicio de almacenamiento
 
 @Component({
   selector: 'app-home',
@@ -18,7 +18,7 @@ export class HomePage implements OnInit {
 
   constructor(
     private router: Router,
-    private storageService: StorageService
+    private storageService: SqliteStorageService
   ) {
     addIcons({ cloudUploadOutline });
   }

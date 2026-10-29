@@ -35,11 +35,20 @@
 
           <!-- ENCABEZADO EXCLUSIVO PARA IMPRESIÓN/PDF -->
           <div class="print-header-only">
-            <div class="print-logos-row">
-              <img src="assets/icon/logo-centrogeo-1.png" alt="CentroGeo" class="print-logo" />
-              <img src="assets/icon/logo-voz-maya.png" alt="La Voz Maya" class="print-logo-maya" />
+            
+            <!-- FILA SUPERIOR: 3 LOGOS INSTITUCIONALES -->
+            <div class="print-logos-top-row">
               <img src="assets/icon/logo-centrogeo-2.png" alt="GeoInt" class="print-logo" />
+              <img src="assets/icon/logo-centrogeo-1.png" alt="CentroGeo" class="print-logo" />
+              <img src="assets/icon/asociacion-sofia.png" alt="Asociación Sofía" class="print-logo" />
             </div>
+
+            <!-- FILA INFERIOR: LOGO DE LA VOZ MAYA CENTRADO Y MÁS GRANDE -->
+            <div class="print-logo-main-row">
+              <img src="assets/icon/logo-voz-maya.png" alt="La Voz Maya" class="print-logo-maya-large" />
+            </div>
+
+
             <h2 class="print-doc-title">Reporte de Evaluación de Salud Emocional</h2>
             <p class="print-date">Fecha de Emisión: {{ fechaReporte }}</p>
             <hr class="print-divider" />

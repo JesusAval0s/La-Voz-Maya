@@ -1,8 +1,10 @@
-import { Component, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { IonContent } from '@ionic/angular';
+import { SqliteStorageService } from '../../core/services/sqlite-storage.service';
+
 
 interface OpcionSueno {
   texto: string;
@@ -24,7 +26,7 @@ interface PreguntaSueno {
   standalone: true,
   imports: [CommonModule, FormsModule, IonContent],
 })
-export class HabitosSuenoPage implements OnDestroy {
+export class HabitosSuenoPage implements OnInit, OnDestroy {
   public respuestas = {
     p1_horas_dormidas: '',
     p2_trastornos_sueno: '',
@@ -79,8 +81,16 @@ export class HabitosSuenoPage implements OnDestroy {
 
   constructor(
     private router: Router,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private storageService: SqliteStorageService
   ) {}
+  ngOnInit(): void {
+    const folio = this.storageService.getFolioActivo();
+    if (!folio) {
+      console.warn('⚠️ No se detectó un folio activo. Redirigiendo a Datos Generales...');
+      this.router.navigate(['/datos-generales']);
+    }
+  }
 
   ngOnDestroy(): void {
     this.detenerAudio();
@@ -184,16 +194,45 @@ export class HabitosSuenoPage implements OnDestroy {
     }
   }
 
-  public guardarYContinuar(): void {
+  public async guardarYContinuar(): Promise<void> {
     this.intentoGuardar = true;
 
     const obligatorias = ['p1', 'p2', 'p3', 'p4'];
     const hayError = obligatorias.some((p) => this.esInvalida(p));
 
-    if (hayError) return;
+    if (hayError) {
+      console.warn('Faltan campos obligatorios por completar en Hábitos de Sueño.');
+      return;
+    }
 
     this.detenerAudio();
-    console.log('Hábitos de Sueño completados:', this.respuestas);
-    this.router.navigate(['/actividad-fisica']);
+
+    try {
+      // 1. Obtener el folio activo de la sesión
+      const encuestaId = this.storageService.getFolioActivo();
+      if (!encuestaId) {
+        console.error('No hay folio activo. Redirigiendo a Datos Generales...');
+        this.router.navigate(['/datos-generales']);
+        return;
+      }
+
+      // 2. Guardar respuestas en SQLite
+      await this.storageService.guardarRespuestasCuestionario(
+        encuestaId,
+        'habitos_sueno',
+        this.respuestas
+      );
+
+      console.log(`Hábitos de Sueño guardados con éxito para el folio: ${encuestaId}`);
+
+      // 3. Imprimir tabla en consola para auditar los datos de este cuestionario
+      await this.storageService.imprimirRespuestasEnConsola('habitos_sueno', encuestaId);
+
+      // 4. Quitar foco para prevenir la advertencia aria-hidden y avanzar
+      (document.activeElement as HTMLElement)?.blur();
+      this.router.navigate(['/actividad-fisica']);
+    } catch (error) {
+      console.error('Error al persistir hábitos de sueño localmente:', error);
+    }
   }
 }

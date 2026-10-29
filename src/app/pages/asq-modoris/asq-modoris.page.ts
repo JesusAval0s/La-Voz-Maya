@@ -1,8 +1,10 @@
-import { Component, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { IonContent } from '@ionic/angular';
+import { SqliteStorageService } from '../../core/services/sqlite-storage.service';
+
 
 interface OpcionASQ {
   texto: string;
@@ -16,7 +18,7 @@ interface OpcionASQ {
   standalone: true,
   imports: [CommonModule, FormsModule, IonContent],
 })
-export class AsqModorisPage implements OnDestroy {
+export class AsqModorisPage implements OnInit, OnDestroy {
   public respuestas = {
     p1_deseado_muerto: '',
     p2_familia_mejor_muerto: '',
@@ -52,8 +54,17 @@ export class AsqModorisPage implements OnDestroy {
 
   constructor(
     private router: Router,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private storageService: SqliteStorageService
   ) {}
+
+  ngOnInit(): void {
+    const folio = this.storageService.getFolioActivo();
+    if (!folio) {
+      console.warn('⚠️ No se detectó un folio activo. Redirigiendo a Datos Generales...');
+      this.router.navigate(['/datos-generales']);
+    }
+  }
 
   ngOnDestroy(): void {
     this.detenerAudio();
@@ -382,23 +393,73 @@ export class AsqModorisPage implements OnDestroy {
         return false;
     }
   }
-
-  public guardarYContinuar(): void {
+  public async guardarYContinuar(): Promise<void> {
     this.intentoGuardar = true;
 
     const obligatorias = ['p1', 'p2', 'p3', 'p4', 'p4_1', 'p4_2', 'p5', 'p5_1'];
     const hayError = obligatorias.some((c) => this.esInvalida(c));
 
-    if (hayError) return;
+    if (hayError) {
+      console.warn('Faltan reactivos obligatorios por completar en ASQ-MODORIS.');
+      return;
+    }
 
     this.detenerAudio();
     this.detenerGrabacionSiExiste();
     this.detenerPlaybackGrabado();
 
-    console.log('Resultados ASQ Modoris completados:', this.respuestas);
-    console.log('Audios WAV grabados:', this.audiosBlob);
+    try {
+      // 1. Obtener el folio activo obligatorio
+      const encuestaId = this.storageService.getFolioActivo();
+      if (!encuestaId) {
+        console.error('No hay folio activo. Redirigiendo a Datos Generales...');
+        this.router.navigate(['/datos-generales']);
+        return;
+      }
 
-    // Fin del flujo: Navegación a la pantalla final
-    this.router.navigate(['/reporte-condicion']);
+      // 2. Guardar respuestas estructuradas en SQLite
+      await this.storageService.guardarRespuestasCuestionario(
+        encuestaId,
+        'asq_modoris',
+        this.respuestas
+      );
+
+      // 3. Persistir físicamente en disco y registrar en SQLite las notas de voz generadas
+      if (this.audiosBlob['p4_1']) {
+        await this.storageService.guardarAudioLocal(
+          encuestaId,
+          'asq_p4_1_como_lo_hizo',
+          this.audiosBlob['p4_1']
+        );
+      }
+
+      if (this.audiosBlob['p4_2']) {
+        await this.storageService.guardarAudioLocal(
+          encuestaId,
+          'asq_p4_2_cuando_ocurrio',
+          this.audiosBlob['p4_2']
+        );
+      }
+
+      if (this.audiosBlob['p5_1']) {
+        await this.storageService.guardarAudioLocal(
+          encuestaId,
+          'asq_p5_1_describa_pensamientos',
+          this.audiosBlob['p5_1']
+        );
+      }
+
+      console.log(`ASQ-MODORIS guardado con éxito para el folio: ${encuestaId}`);
+
+      // 4. Imprimir tabla en consola para auditar los reactivos de esta sección
+      await this.storageService.imprimirRespuestasEnConsola('asq_modoris', encuestaId);
+
+      // 5. Quitar foco para prevenir la advertencia aria-hidden y avanzar al reporte final
+      (document.activeElement as HTMLElement)?.blur();
+      this.router.navigate(['/reporte-condicion']);
+    } catch (error) {
+      console.error('Error al persistir ASQ-MODORIS localmente:', error);
+    }
   }
+  
 }

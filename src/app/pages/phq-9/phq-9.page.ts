@@ -1,8 +1,10 @@
-import { Component, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { IonContent } from '@ionic/angular';
+import { SqliteStorageService } from '../../core/services/sqlite-storage.service';
+
 
 interface OpcionEscala {
   texto: string;
@@ -29,7 +31,7 @@ interface PreguntaSiNo {
   standalone: true,
   imports: [CommonModule, FormsModule, IonContent],
 })
-export class Phq9Page implements OnDestroy {
+export class Phq9Page implements OnInit, OnDestroy {
   public respuestas: { [key: string]: any } = {
     p1: null,
     p2: null,
@@ -79,8 +81,17 @@ export class Phq9Page implements OnDestroy {
 
   constructor(
     private router: Router,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private storageService: SqliteStorageService
   ) {}
+
+  ngOnInit(): void {
+    const folio = this.storageService.getFolioActivo();
+    if (!folio) {
+      console.warn('⚠️ No se detectó un folio activo. Redirigiendo a Datos Generales...');
+      this.router.navigate(['/datos-generales']);
+    }
+  }
 
   ngOnDestroy(): void {
     this.detenerAudio();
@@ -169,13 +180,14 @@ export class Phq9Page implements OnDestroy {
     return this.respuestas[idCampo] === null || this.respuestas[idCampo] === '';
   }
 
-  public guardarYContinuar(): void {
+  public async guardarYContinuar(): Promise<void> {
     this.intentoGuardar = true;
 
     const obligatorias = ['p1', 'p2', 'p3', 'p4', 'p5', 'p6', 'p7', 'p8', 'p9', 'p10', 'p11'];
     const hayIncompletas = obligatorias.some((campo) => this.esInvalida(campo));
 
     if (hayIncompletas) {
+      console.warn('Faltan reactivos por completar en el PHQ-9.');
       return;
     }
 
@@ -183,17 +195,17 @@ export class Phq9Page implements OnDestroy {
 
     // 1. Cálculo de puntaje acumulado (preguntas 1 a 9)
     const puntajeTotal =
-      this.respuestas['p1'] +
-      this.respuestas['p2'] +
-      this.respuestas['p3'] +
-      this.respuestas['p4'] +
-      this.respuestas['p5'] +
-      this.respuestas['p6'] +
-      this.respuestas['p7'] +
-      this.respuestas['p8'] +
-      this.respuestas['p9'];
+      Number(this.respuestas['p1']) +
+      Number(this.respuestas['p2']) +
+      Number(this.respuestas['p3']) +
+      Number(this.respuestas['p4']) +
+      Number(this.respuestas['p5']) +
+      Number(this.respuestas['p6']) +
+      Number(this.respuestas['p7']) +
+      Number(this.respuestas['p8']) +
+      Number(this.respuestas['p9']);
 
-    // 2. Criterios de evaluación idénticos al backend PHP
+    // 2. Criterios de evaluación idénticos al backend
     const esPositivoPorPuntaje = puntajeTotal >= 11;
     const esPositivoPorRespuestas =
       this.respuestas['p9'] > 0 ||
@@ -202,16 +214,44 @@ export class Phq9Page implements OnDestroy {
 
     const esDeteccionPositiva = esPositivoPorPuntaje || esPositivoPorRespuestas;
 
-    console.log('Resultados PHQ-9:', {
-      respuestas: this.respuestas,
-      puntaje: puntajeTotal,
+    // 3. Empaquetar respuestas junto con el score clínico calculado
+    const payloadPhq9 = {
+      ...this.respuestas,
+      puntaje_total: puntajeTotal,
       deteccion: esDeteccionPositiva ? 'Positiva' : 'Negativa',
-    });
+    };
 
-    if (esDeteccionPositiva) {
-  this.router.navigate(['/asq-modoris']);
-} else {
-  this.router.navigate(['/reporte-condicion']);
-}
+    try {
+      // 4. Obtener el folio activo de la sesión
+      const encuestaId = this.storageService.getFolioActivo();
+      if (!encuestaId) {
+        console.error('No hay folio activo. Redirigiendo a Datos Generales...');
+        this.router.navigate(['/datos-generales']);
+        return;
+      }
+
+      // 5. Guardar en SQLite
+      await this.storageService.guardarRespuestasCuestionario(
+        encuestaId,
+        'phq_9',
+        payloadPhq9
+      );
+
+      console.log(`PHQ-9 guardado con éxito para el folio: ${encuestaId}`);
+
+      // 6. Imprimir tabla en consola para auditar los reactivos y puntaje
+      await this.storageService.imprimirRespuestasEnConsola('phq_9', encuestaId);
+
+      // 7. Quitar foco para prevenir la advertencia aria-hidden y derivar según detección
+      (document.activeElement as HTMLElement)?.blur();
+
+      if (esDeteccionPositiva) {
+        this.router.navigate(['/asq-modoris']);
+      } else {
+        this.router.navigate(['/reporte-condicion']);
+      }
+    } catch (error) {
+      console.error('Error al persistir PHQ-9 localmente:', error);
+    }
   }
 }

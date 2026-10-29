@@ -1,8 +1,10 @@
-import { Component, OnDestroy, ChangeDetectorRef, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit,OnDestroy, ChangeDetectorRef, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { IonContent } from '@ionic/angular';
+import { SqliteStorageService } from '../../core/services/sqlite-storage.service';
+
 
 interface SustanciaItem {
   id: string;
@@ -22,7 +24,7 @@ interface OpcionRespuesta {
   standalone: true,
   imports: [CommonModule, FormsModule, IonContent],
 })
-export class AssistPage implements OnDestroy {
+export class AssistPage implements OnInit, OnDestroy {
   @ViewChild('tableWrapper') tableWrapperRef!: ElementRef<HTMLDivElement>;
 
   public sustancias: SustanciaItem[] = [
@@ -87,9 +89,17 @@ export class AssistPage implements OnDestroy {
 
   constructor(
     private router: Router,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private storageService: SqliteStorageService
   ) {
     this.inicializarRespuestas();
+  }
+  ngOnInit(): void {
+    const folio = this.storageService.getFolioActivo();
+    if (!folio) {
+      console.warn('⚠️ No se detectó un folio activo. Redirigiendo a Datos Generales...');
+      this.router.navigate(['/datos-generales']);
+    }
   }
 
   ngOnDestroy(): void {
@@ -279,7 +289,8 @@ export class AssistPage implements OnDestroy {
     return false;
   }
 
-  public guardarYContinuar(): void {
+
+  public async guardarYContinuar(): Promise<void> {
     this.intentoGuardar = true;
 
     if (
@@ -291,11 +302,39 @@ export class AssistPage implements OnDestroy {
       this.esInvalida('p7') ||
       this.esInvalida('p8')
     ) {
+      console.warn('Faltan reactivos obligatorios por completar en ASSIST v3.1.');
       return;
     }
 
     this.detenerAudio();
-    console.log('Resultados ASSIST v3.1 completados:', this.respuestas);
-    this.router.navigate(['/phq-9']);
+
+    try {
+      // 1. Obtener el folio activo de la sesión
+      const encuestaId = this.storageService.getFolioActivo();
+      if (!encuestaId) {
+        console.error('No hay folio activo. Redirigiendo a Datos Generales...');
+        this.router.navigate(['/datos-generales']);
+        return;
+      }
+
+      // 2. Guardar respuestas del ASSIST v3.1 en SQLite
+      await this.storageService.guardarRespuestasCuestionario(
+        encuestaId,
+        'assist',
+        this.respuestas
+      );
+
+      console.log(`ASSIST v3.1 guardado con éxito para el folio: ${encuestaId}`);
+
+      // 3. Imprimir tabla en consola para auditar los reactivos
+      await this.storageService.imprimirRespuestasEnConsola('assist', encuestaId);
+
+      // 4. Quitar foco para prevenir la advertencia aria-hidden y avanzar al PHQ-9
+      (document.activeElement as HTMLElement)?.blur();
+      this.router.navigate(['/phq-9']);
+    } catch (error) {
+      console.error('Error al persistir ASSIST v3.1 localmente:', error);
+    }
   }
+  
 }

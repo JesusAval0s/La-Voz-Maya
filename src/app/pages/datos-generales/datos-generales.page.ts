@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { IonContent } from '@ionic/angular';
-import { StorageService } from '../../core/services/storage.service';
+import { SqliteStorageService } from '../../core/services/sqlite-storage.service';
 
 @Component({
   selector: 'app-datos-generales',
@@ -52,7 +52,7 @@ export class DatosGeneralesPage implements OnDestroy {
   constructor(
     private router: Router,
     private cdr: ChangeDetectorRef,
-    private storageService: StorageService
+    private storageService: SqliteStorageService
   ) {}
 
   ngOnDestroy(): void {
@@ -237,23 +237,26 @@ export class DatosGeneralesPage implements OnDestroy {
     this.detenerAudio();
 
     try {
-      // Generarando ID para folio
+      // 1. Generar nuevo ID de folio para el inicio de la encuesta
       const encuestaId = `FOLIO_${Date.now()}`;
 
-      // Guardando los datos generales estructurados en la base de datos local SQLite
+      // 2. REGISTRAR EL FOLIO ACTIVO EN EL SERVICIO (LÍNEA CLAVE QUE FALTABA)
+      this.storageService.setFolioActivo(encuestaId);
+
+      // 3. Guardar los datos generales en SQLite
       await this.storageService.guardarRespuestasCuestionario(
         encuestaId,
         'datos_generales',
         this.formulario
       );
 
+      // 4. Imprimir en consola pasando el cuestionario y el folio recién creado
+      await this.storageService.imprimirRespuestasEnConsola('datos_generales', encuestaId);
 
-      // LLAMADA PARA IMPRIMIR EN CONSOLA:
-      await this.storageService.imprimirRespuestasEnConsola('datos_generales');
-
-
-      
       console.log('Datos Generales guardados localmente con éxito en SQLite.');
+
+      // 5. Quitar foco para evitar advertencia de accesibilidad y avanzar
+      (document.activeElement as HTMLElement)?.blur();
       this.router.navigate(['/informacion-adicional']);
     } catch (error) {
       console.error('Error al persistir los datos generales localmente:', error);

@@ -1,8 +1,10 @@
-import { Component, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { IonContent } from '@ionic/angular';
+import { SqliteStorageService } from '../../core/services/sqlite-storage.service';
+
 
 interface OpcionActividad {
   texto: string;
@@ -24,7 +26,7 @@ interface PreguntaActividad {
   standalone: true,
   imports: [CommonModule, FormsModule, IonContent],
 })
-export class ActividadFisicaPage implements OnDestroy {
+export class ActividadFisicaPage implements OnInit, OnDestroy {
   public respuestas = {
     p1_frecuencia_actividad: '',
     p2_tipo_ejercicio: '',
@@ -48,8 +50,17 @@ export class ActividadFisicaPage implements OnDestroy {
 
   constructor(
     private router: Router,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private storageService: SqliteStorageService
   ) {}
+
+  ngOnInit(): void {
+    const folio = this.storageService.getFolioActivo();
+    if (!folio) {
+      console.warn('⚠️ No se detectó un folio activo. Redirigiendo a Datos Generales...');
+      this.router.navigate(['/datos-generales']);
+    }
+  }
 
   ngOnDestroy(): void {
     this.detenerAudio();
@@ -156,15 +167,47 @@ export class ActividadFisicaPage implements OnDestroy {
     }
   }
 
-  public guardarYContinuar(): void {
+  public async guardarYContinuar(): Promise<void> {
     this.intentoGuardar = true;
 
     if (this.esInvalida('p1') || this.esInvalida('p2')) {
+      console.warn('Faltan campos obligatorios por completar en Actividad Física.');
       return;
     }
 
     this.detenerAudio();
-    console.log('Actividad Física completada:', this.respuestas);
-    this.router.navigate(['/gad-7']);
+
+    // Regla de consistencia: si nunca hace actividad, p2 queda explícito como 'No aplica'
+    if (this.respuestas.p1_frecuencia_actividad === 'Nunca') {
+      this.respuestas.p2_tipo_ejercicio = 'No aplica';
+    }
+
+    try {
+      // 1. Obtener el folio activo de la sesión
+      const encuestaId = this.storageService.getFolioActivo();
+      if (!encuestaId) {
+        console.error('No hay folio activo. Redirigiendo a Datos Generales...');
+        this.router.navigate(['/datos-generales']);
+        return;
+      }
+
+      // 2. Guardar respuestas en SQLite
+      await this.storageService.guardarRespuestasCuestionario(
+        encuestaId,
+        'actividad_fisica',
+        this.respuestas
+      );
+
+      console.log(`Actividad Física guardada con éxito para el folio: ${encuestaId}`);
+
+      // 3. Imprimir tabla en consola para auditar los datos de este cuestionario
+      await this.storageService.imprimirRespuestasEnConsola('actividad_fisica', encuestaId);
+
+      // 4. Quitar foco para prevenir la advertencia aria-hidden y avanzar al GAD-7
+      (document.activeElement as HTMLElement)?.blur();
+      this.router.navigate(['/gad-7']);
+    } catch (error) {
+      console.error('Error al persistir actividad física localmente:', error);
+    }
   }
 }

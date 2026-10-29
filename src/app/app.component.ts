@@ -2,9 +2,8 @@ import { Component, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectorRef } from '@angular/c
 import { CommonModule } from '@angular/common';
 import { Device } from '@capacitor/device';
 import { Platform } from '@ionic/angular';
-// Importación correcta para Standalone:
 import { IonApp, IonRouterOutlet } from '@ionic/angular';
-import { StorageService } from './core/services/storage.service';
+import { SqliteStorageService } from './core/services/sqlite-storage.service';
 
 @Component({
   selector: 'app-root',
@@ -20,7 +19,7 @@ export class AppComponent {
 
   constructor(
     private platform: Platform,
-    private storageService: StorageService,
+    private storageService: SqliteStorageService,
     private cdRef: ChangeDetectorRef
   ) {
     this.initApp();

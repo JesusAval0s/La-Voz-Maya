@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { IonContent } from '@ionic/angular';
-import { StorageService, CuestionarioRegistro } from '../../core/services/storage.service';
+import { SqliteStorageService, CuestionarioRegistro } from '../../core/services/sqlite-storage.service';
 
 @Component({
   selector: 'app-gestion-nube',
@@ -16,7 +16,7 @@ export class GestionNubePage implements OnInit {
 
   constructor(
     private router: Router,
-    private storageService: StorageService
+    private storageService: SqliteStorageService
   ) {}
 
   async ngOnInit() {

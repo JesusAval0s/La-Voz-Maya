@@ -1,8 +1,10 @@
-import { Component, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { IonContent } from '@ionic/angular';
+import { SqliteStorageService } from '../../core/services/sqlite-storage.service';
+
 
 interface OpcionGad7 {
   texto: string;
@@ -22,7 +24,7 @@ interface PreguntaGad7 {
   standalone: true,
   imports: [CommonModule, FormsModule, IonContent],
 })
-export class Gad7Page implements OnDestroy {
+export class Gad7Page implements OnInit, OnDestroy {
   public respuestas: { [key: string]: string } = {
     p1_nervioso: '',
     p2_controlar_preocupacion: '',
@@ -56,8 +58,17 @@ export class Gad7Page implements OnDestroy {
 
   constructor(
     private router: Router,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private storageService: SqliteStorageService
   ) {}
+
+  ngOnInit(): void {
+    const folio = this.storageService.getFolioActivo();
+    if (!folio) {
+      console.warn('⚠️ No se detectó un folio activo. Redirigiendo a Datos Generales...');
+      this.router.navigate(['/datos-generales']);
+    }
+  }
 
   ngOnDestroy(): void {
     this.detenerAudio();
@@ -148,16 +159,43 @@ export class Gad7Page implements OnDestroy {
     return !this.respuestas[idCampo];
   }
 
-  public guardarYContinuar(): void {
+  public async guardarYContinuar(): Promise<void> {
     this.intentoGuardar = true;
 
     const hayIncompletas = this.listaPreguntas.some((p) => this.esInvalida(p.id));
     if (hayIncompletas) {
+      console.warn('Faltan reactivos por responder en el GAD-7.');
       return;
     }
 
     this.detenerAudio();
-    console.log('Resultados GAD-7 completados:', this.respuestas);
-    this.router.navigate(['/assist']);
+
+    try {
+      // 1. Obtener el folio activo de la sesión
+      const encuestaId = this.storageService.getFolioActivo();
+      if (!encuestaId) {
+        console.error('No hay folio activo. Redirigiendo a Datos Generales...');
+        this.router.navigate(['/datos-generales']);
+        return;
+      }
+
+      // 2. Guardar respuestas del GAD-7 en SQLite
+      await this.storageService.guardarRespuestasCuestionario(
+        encuestaId,
+        'gad_7',
+        this.respuestas
+      );
+
+      console.log(`GAD-7 guardado con éxito para el folio: ${encuestaId}`);
+
+      // 3. Imprimir tabla en consola para auditar los reactivos
+      await this.storageService.imprimirRespuestasEnConsola('gad_7', encuestaId);
+
+      // 4. Quitar foco para prevenir la advertencia aria-hidden y avanzar
+      (document.activeElement as HTMLElement)?.blur();
+      this.router.navigate(['/assist']);
+    } catch (error) {
+      console.error('Error al persistir GAD-7 localmente:', error);
+    }
   }
 }
