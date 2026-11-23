@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">La Voz Maya</string>
+    <string name="title_activity_main">La Voz Maya</string>
+    <string name="package_name">com.lavozmaya.app</string>
+    <string name="custom_url_scheme">com.lavozmaya.app</string>
+</resources>
