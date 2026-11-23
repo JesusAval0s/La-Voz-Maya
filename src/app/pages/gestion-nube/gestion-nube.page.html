@@ -14,11 +14,21 @@
       <!-- TÍTULO DE LA VISTA -->
       <h1 class="sheet-title">Gestión de Sincronización</h1>
 
-      <!-- BOTÓN SUPERIOR DE SINCRONIZAR TODO (CON ICONO LOCAL) -->
+      <!-- BARRA SUPERIOR DE ACCIONES MASIVAS -->
       <div class="sync-top-container">
-        <button type="button" class="sync-all-pill-btn" (click)="sincronizarTodo()">
+        <button type="button" 
+                class="sync-all-pill-btn btn-sync" 
+                (click)="sincronizarTodo()"
+                [disabled]="!hayPendientes()">
           <span>Sincronizar todo</span>
           <img src="assets/icon/sincronizar.png" alt="Sincronizar" class="custom-icon-btn" />
+        </button>
+
+        <button type="button" 
+                class="sync-all-pill-btn btn-delete-all" 
+                (click)="eliminarSincronizados()"
+                [disabled]="!haySincronizados()">
+          <span>Eliminar sincronizados</span>
         </button>
       </div>
 
@@ -26,22 +36,30 @@
       <div class="questions-card-container">
         <div class="scroll-body">
 
+          <div *ngIf="cuestionarios.length === 0" class="empty-state">
+            No hay cuestionarios almacenados localmente.
+          </div>
+
           <!-- BUCLE DE CUESTIONARIOS LOCALES -->
-          <div *ngFor="let item of cuestionarios" 
-               class="record-item-card" 
-               (click)="sincronizarItem(item)">
+          <div *ngFor="let item of cuestionarios" class="record-item-card">
             
             <div class="card-header-row">
-              <span class="folio-text">Folio: {{ item.id }}</span>
-              <span class="date-text">Fecha: {{ item.fecha }}</span>
+              <span class="folio-text">Folio: {{ item.id.toString().replace('FOLIO_', '') }}</span>
+              <span class="date-text">Fecha: {{ item.fecha | date:'dd/MM/yyyy HH:mm' }}</span>
             </div>
 
             <div class="card-body-row">
               <span class="encuestado-label">Encuestado:</span>
-              <span class="encuestado-name">{{ item.nombreEncuestado }}</span>
+              <span class="encuestado-name">{{ item.nombreEncuestado || 'Sin nombre' }}</span>
             </div>
 
-            <!-- ESTADOS DINÁMICOS CON TUS ICONOS LOCALES -->
+            <div class="card-body-row" style="font-size: 0.76rem; color: #4b5563;">
+              <span>Cuestionarios: <strong>{{ item.totalCuestionarios || 0 }}</strong></span>
+              <span>•</span>
+              <span>Audios: <strong>{{ item.totalAudios || 0 }}</strong></span>
+            </div>
+
+            <!-- ESTADOS DINÁMICOS Y BOTONES INDIVIDUALES -->
             <div class="card-footer-row">
               <span class="status-indicator" [ngClass]="item.estadoSincronizacion">
                 
@@ -66,6 +84,23 @@
                 </ng-container>
 
               </span>
+
+              <!-- ACCIONES INDIVIDUALES POR REGISTRO -->
+              <div class="item-actions">
+                <button type="button"
+                        *ngIf="item.estadoSincronizacion === 'local' || item.estadoSincronizacion === 'error'"
+                        class="mini-action-btn btn-item-sync"
+                        (click)="sincronizarItem(item)">
+                  Sincronizar
+                </button>
+
+                <button type="button"
+                        *ngIf="item.estadoSincronizacion !== 'subiendo'"
+                        class="mini-action-btn btn-item-delete"
+                        (click)="eliminarItem(item)">
+                  Eliminar
+                </button>
+              </div>
             </div>
 
           </div>

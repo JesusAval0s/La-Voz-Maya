@@ -238,7 +238,7 @@ export class DatosGeneralesPage implements OnDestroy {
 
     try {
       // 1. Generar nuevo ID de folio para el inicio de la encuesta
-      const encuestaId = `FOLIO_${Date.now()}`;
+      const encuestaId = `${Date.now()}`;
 
       // 2. REGISTRAR EL FOLIO ACTIVO EN EL SERVICIO (LÍNEA CLAVE QUE FALTABA)
       this.storageService.setFolioActivo(encuestaId);
@@ -265,7 +265,6 @@ export class DatosGeneralesPage implements OnDestroy {
 
   
     // Método puente para emparejar la llamada del HTML con la validación existente
-
   public guardarYContinuar(): void {
     this.validarFormulario();
   }

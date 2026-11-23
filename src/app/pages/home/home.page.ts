@@ -1,50 +1,62 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
-import { IonContent, IonIcon } from '@ionic/angular';
-import { addIcons } from 'ionicons';
-import { cloudUploadOutline } from 'ionicons/icons';
-import { SqliteStorageService } from '../../core/services/sqlite-storage.service'; // Asegúrate de importar tu servicio de almacenamiento
+import { Router, NavigationEnd } from '@angular/router';
+import { IonContent } from '@ionic/angular';
+import { Subscription } from 'rxjs';
+import { filter } from 'rxjs/operators';
+import { SqliteStorageService } from '../../core/services/sqlite-storage.service';
 
 @Component({
   selector: 'app-home',
   templateUrl: './home.page.html',
   styleUrls: ['./home.page.scss'],
   standalone: true,
-  imports: [CommonModule, IonContent, IonIcon],
+  imports: [CommonModule, IonContent],
 })
-export class HomePage implements OnInit {
-  public pendingCount: number = 0; // Conteo real basado en archivos locales
+export class HomePage implements OnInit, OnDestroy {
+  public pendingCount: number = 0;
+  private routerSub?: Subscription;
 
   constructor(
     private router: Router,
-    private storageService: SqliteStorageService
-  ) {
-    addIcons({ cloudUploadOutline });
-  }
+    private storageService: SqliteStorageService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   async ngOnInit() {
     await this.cargarConteoPendientes();
+
+    this.routerSub = this.router.events
+      .pipe(filter((event) => event instanceof NavigationEnd))
+      .subscribe(async () => {
+        if (this.router.url.includes('/home')) {
+          await this.cargarConteoPendientes();
+        }
+      });
   }
 
-  // Carga los elementos reales que están guardados localmente
+  ngOnDestroy() {
+    this.routerSub?.unsubscribe();
+  }
+
   public async ionViewWillEnter() {
     await this.cargarConteoPendientes();
   }
 
   private async cargarConteoPendientes() {
     try {
+      await new Promise((resolve) => setTimeout(resolve, 120));
       const registros = await this.storageService.obtenerCuestionariosLocales();
-      // Cuenta solo los que están pendientes o con error localmente
       this.pendingCount = registros.filter(
         (r) => r.estadoSincronizacion === 'local' || r.estadoSincronizacion === 'error'
       ).length;
     } catch (e) {
-      this.pendingCount = 0; // Si está limpio, inicia en 0 por defecto
+      this.pendingCount = 0;
+    } finally {
+      this.cdr.detectChanges();
     }
   }
 
-  // Redirige a la ventana de gestión de la nube que diseñamos
   public abrirGestionNube(): void {
     this.router.navigate(['/gestion-nube']);
   }

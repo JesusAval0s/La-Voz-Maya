@@ -31,7 +31,7 @@
         />
       </div>
 
-      <!-- BOTÓN DE NUBE DE SINCRONIZACIÓN -->
+      <!-- BOTÓN DE SINCRONIZACIÓN CON ICONO PERSONALIZADO -->
       <div class="cloud-anchor">
         <button 
           type="button"
@@ -39,7 +39,11 @@
           (click)="abrirGestionNube()"
           aria-label="Ir a gestión de sincronización"
         >
-          <ion-icon name="cloud-upload-outline"></ion-icon>
+          <img 
+            src="/assets/icon/nube.png" 
+            alt="Sincronización" 
+            class="cloud-icon" 
+          />
           <span class="badge" *ngIf="pendingCount > 0">
             {{ pendingCount }}
           </span>

@@ -32,13 +32,20 @@ export class AppComponent {
 
       try {
         await this.storageService.inicializarBaseDatos();
-        this.load = true;
         console.log('Base de datos lista, cargando router-outlet.');
-        
-        // Forzar a Angular a pintar el router-outlet de inmediato
-        this.cdRef.detectChanges();
       } catch (error) {
-        console.error('Error crítico al inicializar la base de datos:', error);
+        console.warn('Primer intento de BD falló, reintentando en 500ms...', error);
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        try {
+          await this.storageService.inicializarBaseDatos();
+          console.log('Base de datos lista en segundo intento.');
+        } catch (err2) {
+          console.error('Error crítico al inicializar la base de datos:', err2);
+        }
+      } finally {
+        // Siempre habilita la interfaz para evitar pantalla negra
+        this.load = true;
+        this.cdRef.detectChanges();
       }
     });
   }

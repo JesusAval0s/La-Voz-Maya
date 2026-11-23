@@ -59,8 +59,14 @@
         object-fit: contain;
       }
     }
+    .cloud-icon {
+          width: 35px;  // 👈 Reduce aquí (prueba entre 20px y 24px según qué tan discreto lo quieras)
+          height: 35px;
+          object-fit: contain;
+          display: block;
+        }
 
-    // Botón de nube posicionado en la esquina
+    // Botón circular posicionado en la esquina (sin contorno)
     .cloud-anchor {
       position: absolute;
       left: 1.2rem;
@@ -72,7 +78,8 @@
         height: 52px;
         border-radius: 50%;
         background: #ffffff;
-        border: 2px solid #111111;
+        border: none;
+        outline: none;
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
         display: flex;
         justify-content: center;
@@ -80,31 +87,30 @@
         position: relative;
         cursor: pointer;
         padding: 0;
+        -webkit-tap-highlight-color: transparent;
 
-        ion-icon {
-          font-size: 28px;
-          color: #1a1a1a;
+        &:active {
+          transform: scale(0.95);
         }
 
+        // Globito gris estilo WhatsApp sin contorno y número en negro
         .badge {
           position: absolute;
           top: -4px;
           right: -4px;
-          background: #e02424;
-          color: #ffffff;
-          font-size: 11px;
+          background: #9ca3af;
+          color: #111111;
+          font-size: 12px;
           font-weight: 800;
           border-radius: 50%;
-          min-width: 20px;
-          height: 20px;
+          min-width: 22px;
+          height: 22px;
+          padding: 0 5px;
           display: flex;
           align-items: center;
           justify-content: center;
-          border: 2px solid #ffffff;
-        }
-
-        &.syncing {
-          animation: spin-pulse 1.4s infinite ease-in-out;
+          border: none;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.18);
         }
       }
     }
@@ -116,7 +122,7 @@
     background: #ddf4e2; // Verde claro pastel
     border-top-left-radius: 46px;
     border-top-right-radius: 46px;
-    margin-top: -30px;                         //para subir el rectangulo verde claro completo acercandolo al logo de la voz maya
+    margin-top: -30px;
     padding: 3.5rem 1.8rem 2rem 1.8rem;
     display: flex;
     flex-direction: column;
@@ -184,10 +190,4 @@
       }
     }
   }
-}
-
-@keyframes spin-pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.08); }
-  100% { transform: scale(1); }
 }
